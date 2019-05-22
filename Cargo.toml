@@ -1,0 +1,7 @@
+[package]
+name = "basket-api"
+version = "0.1.0"
+authors = ["dominikus1993 <dominikus1910@gmail.com>"]
+edition = "2018"
+
+[dependencies]
