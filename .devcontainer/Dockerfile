@@ -5,9 +5,6 @@
 
 FROM rust:1
 
-# Copy endpoint specific user setting overrides into container
-COPY settings.vscode.json /root/.vscode-remote/data/Machine/settings.json
-
 RUN rustup update
 RUN rustup component add rls rust-analysis rust-src
 
@@ -21,3 +18,6 @@ RUN apt-get install -y lldb-3.9
 RUN apt-get autoremove -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
+
+# Set the default shell to bash instead of sh
+ENV SHELL /bin/bash

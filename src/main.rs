@@ -27,17 +27,15 @@ impl CustomerBasket {
 
 impl Basket for CustomerBasket {
     fn add_item(&mut self, product_id: ProductId, quantity: u8)  {
-        let items: Vec<_> = self.items.iter().filter(|&item| item.id == product_id).collect();
+        let items: Vec<_> = self.items.iter().filter(|item| item.id == product_id).collect();
         let item = items.first();
         match item {
             Some(i) => {
                 let newQuantity = i.quantity + quantity;
                 let newItem = BasketItem{ quantity: newQuantity, ..i };
-                println!("{:?}", i)
             }
             None => println!("Nope")
-        }
-        
+        }       
     }
 }
 
