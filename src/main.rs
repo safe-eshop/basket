@@ -1,11 +1,5 @@
-
-type ProductId = String;
-
-#[derive(Debug)]
-struct BasketItem {
-    id: ProductId,
-    quantity: u8
-}
+mod basket_item;
+use basket_item::BasketItem;
 
 type CustomerId = String;
 
@@ -16,26 +10,12 @@ struct CustomerBasket {
 }
  
 trait Basket {
-    fn add_item(&mut self, product_id: ProductId, quantity: u8);
+    fn add_item(&mut self, product_id: basket_item::ProductId, quantity: u8);
 }
 
 impl CustomerBasket {
-    fn new(id: String) -> CustomerBasket {
+    fn empty(id: String) -> CustomerBasket {
         return CustomerBasket{ id: id, items: Vec::new()}
-    }
-}
-
-impl Basket for CustomerBasket {
-    fn add_item(&mut self, product_id: ProductId, quantity: u8)  {
-        let items: Vec<_> = self.items.iter().filter(|item| item.id == product_id).collect();
-        let item = items.first();
-        match item {
-            Some(i) => {
-                let newQuantity = i.quantity + quantity;
-                let newItem = BasketItem{ quantity: newQuantity, ..i };
-            }
-            None => println!("Nope")
-        }       
     }
 }
 
@@ -48,7 +28,7 @@ fn main() {
     let basket = get_customer_basket(String::from("ghasdggadsjhgds"));
     match basket {
         Ok(mut b) => {
-            b.add_item(String::from("test"), 12);
+            // b.add_item(String::from("te3st"), 12);
             println!("Ok {:?}", b);
         }           
         Err(er) =>  println!("Error {}", er)
