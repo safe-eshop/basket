@@ -48,4 +48,25 @@ mod tests {
         assert_eq!(subject.items.first().unwrap().id, String::from("dsddsa"));
         assert_eq!(subject.items.first().unwrap().quantity, 12);
     }  
+    #[test]
+    fn add_item_when_exists() {
+        let mut subject = CustomerBasket::empty(String::from("dskjhdsghdsfkjh"));
+        subject.add_item(String::from("dsddsa"), 12);
+        subject.add_item(String::from("dsddsa"), 12);
+        assert_eq!(subject.items.len(), 1);
+        assert_eq!(subject.items.first().unwrap().id, String::from("dsddsa"));
+        assert_eq!(subject.items.first().unwrap().quantity, 24);
+    } 
+    #[test]
+    fn add_item_when_exists2() {
+        let mut subject = CustomerBasket::empty(String::from("dskjhdsghdsfkjh"));
+        subject.add_item(String::from("dsddsa"), 12);
+        subject.add_item(String::from("dsddsa"), 12);
+        subject.add_item(String::from("dsddsa22222222222222222222"), 12);
+        assert_eq!(subject.items.len(), 2);
+        assert_eq!(subject.items.first().unwrap().id, String::from("dsddsa"));
+        assert_eq!(subject.items.first().unwrap().quantity, 24);
+        assert_eq!(subject.items.first().unwrap().id, String::from("dsddsa22222222222222222222"));
+        assert_eq!(subject.items.first().unwrap().quantity, 12);
+    }  
 }
