@@ -26,10 +26,11 @@ pub fn get_customer_basket(customer_id: String) -> Result<CustomerBasket, String
 
 impl Basket for CustomerBasket {
     fn add_item(&mut self, product_id: basket_item::ProductId, quantity: u8) {
-        let mut items: Vec<_> = self.items.iter().filter(|item| item.id == product_id).collect();
+        let mut items: Vec<_> = self.items.iter().filter(|&item| item.id == product_id).collect::<Vec<&BasketItem>>();
         let item = items.first_mut();
         match item {
             Some(&mut i) => {
+                let a = i;
                 println!("sdngdsj")
             },
             None => {
