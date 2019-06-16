@@ -26,16 +26,16 @@ pub fn get_customer_basket(customer_id: String) -> Result<CustomerBasket, String
 
 impl Basket for CustomerBasket {
     fn add_item(&mut self, product_id: basket_item::ProductId, quantity: u8) {
-        let mut items: Vec<_> = self.items.iter().filter(|&item| item.id == product_id).collect::<Vec<&BasketItem>>();
-        let item = items.first_mut();
-        match item {
-            Some(&mut i) => {
-                let a = i;
-                println!("sdngdsj")
-            },
-            None => {
-                self.items.push(BasketItem { id: product_id, quantity: quantity })
-            }
+        let mut found = false;
+        for item in self.items.iter_mut() {
+            if item.id == product_id {
+                (*item).quantity += quantity;
+                found = true;
+                break;
+            }           
+        }
+        if !found {
+            self.items.push(BasketItem { id: product_id, quantity: quantity});
         }
     }
 }
@@ -67,9 +67,9 @@ mod tests {
         subject.add_item(String::from("dsddsa"), 12);
         subject.add_item(String::from("dsddsa22222222222222222222"), 12);
         assert_eq!(subject.items.len(), 2);
-        assert_eq!(subject.items.first().unwrap().id, String::from("dsddsa"));
-        assert_eq!(subject.items.first().unwrap().quantity, 24);
-        assert_eq!(subject.items.first().unwrap().id, String::from("dsddsa22222222222222222222"));
-        assert_eq!(subject.items.first().unwrap().quantity, 12);
+        assert_eq!(subject.items.get(0).unwrap().id, String::from("dsddsa"));
+        assert_eq!(subject.items.get(0).unwrap().quantity, 24);
+        assert_eq!(subject.items.get(1).unwrap().id, String::from("dsddsa22222222222222222222"));
+        assert_eq!(subject.items.get(1).unwrap().quantity, 12);
     }  
 }
