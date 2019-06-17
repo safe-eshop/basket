@@ -1,5 +1,6 @@
 mod basket_item;
 use basket_item::BasketItem;
+use basket_item::Item;
 
 type CustomerId = String;
 
@@ -11,6 +12,7 @@ pub struct CustomerBasket {
  
 trait Basket {
     fn add_item(&mut self, product_id: basket_item::ProductId, quantity: u8);
+    fn remove_item(&mut self, product_id: basket_item::ProductId, quantity: u8);
 }
 
 impl CustomerBasket {
@@ -29,13 +31,30 @@ impl Basket for CustomerBasket {
         let mut found = false;
         for item in self.items.iter_mut() {
             if item.id == product_id {
-                (*item).quantity += quantity;
+                (*item).incease_quantity(quantity);
                 found = true;
                 break;
             }           
         }
         if !found {
             self.items.push(BasketItem { id: product_id, quantity: quantity});
+        }
+    }
+
+    fn remove_item(&mut self, product_id: basket_item::ProductId, quantity: u8) {
+        let mut found = false;
+        for (index, item) in self.items.iter_mut().enumerate() {
+            if item.id == product_id {
+                (*item).decrease_quantity(quantity);      
+                if (*item).is_empty() {
+                    self.items.remove(index);
+                }
+                found = true;
+                break;
+            }           
+        }
+        if !found {
+            panic!("Item not exists");
         }
     }
 }
@@ -72,4 +91,46 @@ mod tests {
         assert_eq!(subject.items.get(1).unwrap().id, String::from("dsddsa22222222222222222222"));
         assert_eq!(subject.items.get(1).unwrap().quantity, 12);
     }  
+
+    #[test]
+    #[should_panic]
+    fn remove_item_when_no_exists() {
+        let mut subject = CustomerBasket::empty(String::from("dskjhdsghdsfkjh"));
+        subject.remove_item(String::from("dsddsa"), 12);
+    }  
+
+    #[test]
+    #[should_panic]
+    fn remove_item_when_exists_and_item_quantity_is_smaller() {
+        let mut subject = CustomerBasket::empty(String::from("dskjhdsghdsfkjh"));
+        subject.add_item(String::from("dsddsa"), 12);
+        subject.add_item(String::from("dsddsa22222222222222222222"), 12);
+        subject.remove_item(String::from("dsddsa"), 24);
+    } 
+
+    #[test]
+    fn remove_item_when_exists() {
+        let mut subject = CustomerBasket::empty(String::from("dskjhdsghdsfkjh"));
+        subject.add_item(String::from("dsddsa"), 12);
+        subject.add_item(String::from("dsddsa"), 12);
+        subject.add_item(String::from("dsddsa22222222222222222222"), 12);
+        subject.remove_item(String::from("dsddsa"), 12);
+        assert_eq!(subject.items.len(), 2);
+        assert_eq!(subject.items.get(0).unwrap().id, String::from("dsddsa"));
+        assert_eq!(subject.items.get(0).unwrap().quantity, 12);
+        assert_eq!(subject.items.get(1).unwrap().id, String::from("dsddsa22222222222222222222"));
+        assert_eq!(subject.items.get(1).unwrap().quantity, 12);
+    }
+    
+    #[test]
+    fn remove_item_when_exists2() {
+        let mut subject = CustomerBasket::empty(String::from("dskjhdsghdsfkjh"));
+        subject.add_item(String::from("dsddsa"), 12);
+        subject.add_item(String::from("dsddsa"), 12);
+        subject.add_item(String::from("dsddsa22222222222222222222"), 12);
+        subject.remove_item(String::from("dsddsa"), 24);
+        assert_eq!(subject.items.len(), 1);
+        assert_eq!(subject.items.get(0).unwrap().id, String::from("dsddsa22222222222222222222"));
+        assert_eq!(subject.items.get(0).unwrap().quantity, 12);
+    }    
 }

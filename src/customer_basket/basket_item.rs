@@ -7,6 +7,7 @@ pub struct BasketItem {
 pub trait Item {
     fn incease_quantity(&mut self, q: u8);
     fn decrease_quantity(&mut self, q: u8);
+    fn is_empty(&self) -> bool;
 }
 impl BasketItem {
     fn empty(id: ProductId) -> BasketItem {
@@ -26,6 +27,9 @@ impl Item for BasketItem {
         } else {
             self.quantity -= q;
         }
+    }
+    fn is_empty(&self) -> bool {
+        return self.quantity == 0;
     }
 }
 
