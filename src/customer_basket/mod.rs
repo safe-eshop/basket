@@ -28,33 +28,29 @@ pub fn get_customer_basket(customer_id: String) -> Result<CustomerBasket, String
 
 impl Basket for CustomerBasket {
     fn add_item(&mut self, product_id: basket_item::ProductId, quantity: u8) {
-        let mut found = false;
-        for item in self.items.iter_mut() {
-            if item.id == product_id {
-                (*item).incease_quantity(quantity);
-                found = true;
-                break;
-            }           
-        }
-        if !found {
-            self.items.push(BasketItem { id: product_id, quantity: quantity});
+        let position = self.items.iter().position(|item| item.id == product_id);
+        match position {
+            Some(pos) => {
+                self.items[pos].incease_quantity(quantity);      
+            },
+            None => {
+                self.items.push(BasketItem { id: product_id, quantity: quantity});
+            }
         }
     }
 
     fn remove_item(&mut self, product_id: basket_item::ProductId, quantity: u8) {
-        let mut found = false;
-        for (index, item) in self.items.iter_mut().enumerate() {
-            if item.id == product_id {
-                (*item).decrease_quantity(quantity);      
-                if (*item).is_empty() {
-                    self.items.remove(index);
+        let position = self.items.iter().position(|item| item.id == product_id);
+        match position {
+            Some(pos) => {
+                self.items[pos].decrease_quantity(quantity);      
+                if self.items[pos].is_empty() {
+                    self.items.remove(pos);
                 }
-                found = true;
-                break;
-            }           
-        }
-        if !found {
-            panic!("Item not exists");
+            },
+            None => {
+                panic!("Item not exists");
+            }
         }
     }
 }
