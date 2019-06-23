@@ -13,6 +13,7 @@ pub struct CustomerBasket {
 trait Basket {
     fn add_item(&mut self, product_id: basket_item::ProductId, quantity: u8);
     fn remove_item(&mut self, product_id: basket_item::ProductId, quantity: u8);
+    fn clear(&mut self);
 }
 
 impl CustomerBasket {
@@ -52,6 +53,10 @@ impl Basket for CustomerBasket {
                 panic!("Item not exists");
             }
         }
+    }
+    
+    fn clear(&mut self){
+        self.items.clear();
     }
 }
 
@@ -128,5 +133,15 @@ mod tests {
         assert_eq!(subject.items.len(), 1);
         assert_eq!(subject.items.get(0).unwrap().id, String::from("dsddsa22222222222222222222"));
         assert_eq!(subject.items.get(0).unwrap().quantity, 12);
+    }    
+
+    #[test]
+    fn cclear_basket() {
+        let mut subject = CustomerBasket::empty(String::from("dskjhdsghdsfkjh"));
+        subject.add_item(String::from("dsddsa"), 12);
+        subject.add_item(String::from("dsddsa"), 12);
+        subject.add_item(String::from("dsddsa22222222222222222222"), 12);
+        subject.clear();
+        assert_eq!(subject.items.len(), 0);
     }    
 }
