@@ -1,13 +1,13 @@
-mod customer_basket;
-use customer_basket::get_customer_basket;
+use actix_web::{web, App, HttpServer, Responder};
 
-fn main() {
-    let basket = get_customer_basket(String::from("ghasdggadsjhgds"));
-    match basket {
-        Ok(mut b) => {
-            // b.add_item(String::from("te3st"), 12);
-            println!("Ok {:?}", b);
-        }           
-        Err(er) =>  println!("Error {}", er)
-    }
+fn index(info: web::Path<(u32, String)>) -> impl Responder {
+    format!("Hello {}! id:{}", info.1, info.0)
+}
+
+fn main() -> std::io::Result<()> {
+    HttpServer::new(
+        || App::new().service(
+              web::resource("/{id}/{name}/index.html").to(index)))
+        .bind("127.0.0.1:8080")?
+        .run()
 }
