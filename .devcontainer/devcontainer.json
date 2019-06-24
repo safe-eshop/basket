@@ -13,7 +13,8 @@
 	"extensions": [
 		"rust-lang.rust",
 		"bungcip.better-toml",
-		"vadimcn.vscode-lldb"
+		"vadimcn.vscode-lldb",
+		"serayuzgur.crates"
 	],
 	"settings": {
 		"lldb.executable": "/usr/bin/lldb-3.9"

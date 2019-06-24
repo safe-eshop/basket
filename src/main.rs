@@ -23,7 +23,6 @@ fn main() -> std::io::Result<()> {
         || App::new()
         .wrap(middleware::Logger::default())
         .service(
-            
               web::resource("/hello/{name}").to(index)))
         .bind("127.0.0.1:8080")?
         .start();
