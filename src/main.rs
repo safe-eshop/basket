@@ -1,13 +1,22 @@
-use actix_web::{web, App, HttpServer, Responder};
+use actix_web::{web, middleware, App, HttpServer, Responder};
 
-fn index(info: web::Path<(u32, String)>) -> impl Responder {
-    format!("Hello {}! id:{}", info.1, info.0)
+fn index(info: web::Path<String>) -> impl Responder {
+    format!("Hello {}!", *info)
 }
 
 fn main() -> std::io::Result<()> {
+    std::env::set_var("RUST_LOG", "actix_web=info");
+    env_logger::init();
+    println!("Server starting");
+    let sys = actix_rt::System::new("basket-api");
     HttpServer::new(
-        || App::new().service(
-              web::resource("/{id}/{name}/index.html").to(index)))
+        || App::new()
+        .wrap(middleware::Logger::default())
+        .service(
+            
+              web::resource("/hello/{name}").to(index)))
         .bind("127.0.0.1:8080")?
-        .run()
+        .start();
+    println!("Starting http server: 127.0.0.1:8080");
+    sys.run()
 }
