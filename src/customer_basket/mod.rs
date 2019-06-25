@@ -1,10 +1,11 @@
 mod basket_item;
 use basket_item::BasketItem;
 use basket_item::Item;
+use serde::{Serialize, Deserialize};
 
 type CustomerId = String;
 
-#[derive(Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct CustomerBasket {
     id: CustomerId,
     items: Vec<BasketItem>
@@ -17,7 +18,7 @@ trait Basket {
 }
 
 impl CustomerBasket {
-    fn empty(id: String) -> CustomerBasket {
+    pub fn empty(id: String) -> CustomerBasket {
         return CustomerBasket{ id: id, items: Vec::new()}
     }
 }

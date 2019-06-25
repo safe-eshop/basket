@@ -1,6 +1,8 @@
 extern crate redis;
+mod customer_basket;
 use redis::Commands;
-use actix_web::{web, middleware, App, HttpRequest, HttpResponse, HttpServer, Responder};
+use actix_web::{web, middleware, App, HttpResponse, HttpServer, Responder};
+use customer_basket::{CustomerBasket};
 
 fn redis() -> redis::Connection {
     let client = redis::Client::open("redis://redis/").unwrap();
@@ -21,15 +23,17 @@ fn index(info: web::Path<String>) -> impl Responder {
 
 fn get_customer_basket() -> HttpResponse  {
     let con = redis();
+    let id = "4cba04f1-2436-4d79-b184-b1a8521ff0f9";
     // convert into one.
-    let customer_basket: Result<Option<String>, redis::RedisError> = con.get("4cba04f1-2436-4d79-b184-b1a8521ff0f9");
+    let customer_basket: Result<Option<String>, redis::RedisError> = con.get(id);
     match customer_basket {
         Ok(basket) => {
-            HttpResponse::Ok().json(2)
+            let basket_resp = basket.map_or(CustomerBasket::empty(String::from(id)), |v| serde_json::from_str(&v).unwrap());
+            HttpResponse::Ok().json(basket_resp)
         }
         Err(ex) => {
             println!("Error {}", ex);
-            HttpResponse::Ok().json(1)
+            HttpResponse::Ok().json(CustomerBasket::empty(String::from(id)))
         }
     }   
 }

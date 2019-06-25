@@ -1,14 +1,19 @@
+use serde::{Serialize, Deserialize};
+
 pub type ProductId = String;
-#[derive(Debug)]
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct BasketItem {
     pub id: ProductId,
     pub quantity: u8
 }
+
 pub trait Item {
     fn incease_quantity(&mut self, q: u8);
     fn decrease_quantity(&mut self, q: u8);
     fn is_empty(&self) -> bool;
 }
+
 impl BasketItem {
     fn empty(id: ProductId) -> BasketItem {
         BasketItem { id: id, quantity: 0 }
@@ -17,6 +22,7 @@ impl BasketItem {
         BasketItem { id: id, quantity: quantity }
     }
 }
+
 impl Item for BasketItem {
     fn incease_quantity(&mut self, q: u8) {
         self.quantity += q;
