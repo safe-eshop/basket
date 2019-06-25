@@ -1,15 +1,16 @@
 extern crate redis;
 mod customer_basket;
 use redis::Commands;
-use actix_web::{web, middleware, App, HttpResponse, HttpServer, Responder};
+use actix_web::{web, middleware, App, Error, HttpResponse, HttpServer};
 use customer_basket::{CustomerBasket};
+use futures::{future, Future, Stream};
 
 fn redis() -> redis::Connection {
     let client = redis::Client::open("redis://redis/").unwrap();
     return client.get_connection().unwrap();
 }
 
-fn index(info: web::Path<String>) -> impl Responder {
+fn index(info: web::Path<String>) -> impl Future<Item = HttpResponse, Error = Error> {
     let client = redis::Client::open("redis://redis/").unwrap();
     let con = client.get_connection().unwrap();
     // throw away the result, just make sure it does not fail
@@ -17,8 +18,15 @@ fn index(info: web::Path<String>) -> impl Responder {
     // read back the key and return it.  Because the return value
     // from the function is a result for integer this will automatically
     // convert into one.
-    let a = con.get("my_key").unwrap_or(0i32);
-    format!("Hello {}! id from redis = {}", *info, a)
+    let a = con.get("my_key");
+
+    future::result::<i32, redis::RedisError>(con.get("my_key"))        
+        .then(|res| {
+          match res {
+              Ok(val) => Ok(val + 3),
+              Err(e) => Err(e),
+          }
+        });
 }
 
 fn get_customer_basket() -> HttpResponse  {
@@ -47,7 +55,7 @@ fn main() -> std::io::Result<()> {
         || App::new()
         .wrap(middleware::Logger::default())
         .service(
-              web::resource("/hello/{name}").to(index))
+              web::resource("/hello/{name}").to_async(index))
         .service(web::resource("/").to(get_customer_basket)))
         .bind("127.0.0.1:8080")?
         .start();
