@@ -3,7 +3,10 @@ mod customer_basket;
 use redis::Commands;
 use actix_web::{web, middleware, App, Error, error, HttpResponse, HttpServer};
 use customer_basket::{CustomerBasket};
+use customer_basket::basket_item::BasketItem;
 use futures::{future, Future, Stream};
+
+static CLIENT_ID: &str = "4cba04f1-2436-4d79-b184-b1a8521ff0f9";
 
 fn redis() -> redis::Connection {
     let client = redis::Client::open("redis://redis/").unwrap();
@@ -31,21 +34,46 @@ fn index(info: web::Path<String>) -> impl Future<Item = HttpResponse, Error = Er
         })
 }
 
-fn get_customer_basket() -> HttpResponse  {
+fn get_customer_basket() -> impl Future<Item = HttpResponse, Error = Error>  {
     let con = redis();
-    let id = "4cba04f1-2436-4d79-b184-b1a8521ff0f9";
-    // convert into one.
-    let customer_basket: Result<Option<String>, redis::RedisError> = con.get(id);
-    match customer_basket {
-        Ok(basket) => {
-            let basket_resp = basket.map_or(CustomerBasket::empty(String::from(id)), |v| serde_json::from_str(&v).unwrap());
-            HttpResponse::Ok().json(basket_resp)
-        }
-        Err(ex) => {
-            println!("Error {}", ex);
-            HttpResponse::Ok().json(CustomerBasket::empty(String::from(id)))
-        }
-    }   
+    future::result::<Option<String>, redis::RedisError>(con.get(CLIENT_ID))        
+        .then(|customer_basket| {
+            match customer_basket {
+                Ok(basket) => {
+                    let basket_resp = basket.map_or(CustomerBasket::empty(String::from(CLIENT_ID)), |v| serde_json::from_str(&v).unwrap());
+                    Ok(basket_resp)
+                }
+                Err(ex) => {
+                    println!("Error {}", ex);
+                    Err(error::ErrorBadRequest("redis error"))
+                }
+            } 
+        })
+        .and_then(|body| {
+            Ok(HttpResponse::Ok().json(body)) // <- send response
+        }) 
+}
+
+fn add_item(item: web::Json<BasketItem>,) -> impl Future<Item = HttpResponse, Error = Error> {
+    let con = redis();
+    future::result::<Option<String>, redis::RedisError>(con.get(CLIENT_ID))        
+        .then(|customer_basket| {
+            match customer_basket {
+                Ok(basket) => {
+                    let mut basket_resp = basket.map_or(CustomerBasket::empty(String::from(CLIENT_ID)), |v| serde_json::from_str(&v).unwrap());                   
+                    basket_resp.add_item(String::from("a971a2de-1d52-46d9-a9aa-e6df2e072d46"), 10);
+                    let _ : () = redis().set(CLIENT_ID, serde_json::to_string(&basket_resp)?).unwrap();
+                    Ok(basket_resp)
+                }
+                Err(ex) => {
+                    println!("Error {}", ex);
+                    Err(error::ErrorBadRequest("redis error"))
+                }
+            } 
+        })
+        .and_then(|body| {
+            Ok(HttpResponse::Ok().json(body)) // <- send response
+        }) 
 }
 
 fn main() -> std::io::Result<()> {
@@ -56,9 +84,11 @@ fn main() -> std::io::Result<()> {
     HttpServer::new(
         || App::new()
         .wrap(middleware::Logger::default())
-        .service(web::resource("/").to(get_customer_basket))
+        .data(web::JsonConfig::default().limit(4096)) 
+        .service(web::resource("/").to_async(get_customer_basket))
         .service(
-              web::resource("/hello/{name}").to_async(index)))
+              web::resource("/hello/{name}").to_async(index))
+        .service(web::resource("/item").route(web::post().to_async(add_item))))
         .bind("127.0.0.1:8080")?
         .start();
     println!("Starting http server: 127.0.0.1:8080");

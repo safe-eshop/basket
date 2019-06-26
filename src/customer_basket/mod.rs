@@ -1,6 +1,5 @@
-mod basket_item;
+pub mod basket_item;
 use basket_item::BasketItem;
-use basket_item::Item;
 use serde::{Serialize, Deserialize};
 
 type CustomerId = String;
@@ -11,25 +10,15 @@ pub struct CustomerBasket {
     items: Vec<BasketItem>
 }
  
-trait Basket {
-    fn add_item(&mut self, product_id: basket_item::ProductId, quantity: u8);
-    fn remove_item(&mut self, product_id: basket_item::ProductId, quantity: u8);
-    fn clear(&mut self);
+pub trait Basket {
 }
 
 impl CustomerBasket {
     pub fn empty(id: String) -> CustomerBasket {
         return CustomerBasket{ id: id, items: Vec::new()}
     }
-}
 
-pub fn get_customer_basket(customer_id: String) -> Result<CustomerBasket, String> {
-    let item = BasketItem { id: String::from("test"), quantity: 3 };
-    return Ok(CustomerBasket { id: customer_id, items: vec![item] });
-}
-
-impl Basket for CustomerBasket {
-    fn add_item(&mut self, product_id: basket_item::ProductId, quantity: u8) {
+    pub fn add_item(&mut self, product_id: basket_item::ProductId, quantity: u8) {
         let position = self.items.iter().position(|item| item.id == product_id);
         match position {
             Some(pos) => {
@@ -41,7 +30,7 @@ impl Basket for CustomerBasket {
         }
     }
 
-    fn remove_item(&mut self, product_id: basket_item::ProductId, quantity: u8) {
+    pub fn remove_item(&mut self, product_id: basket_item::ProductId, quantity: u8) {
         let position = self.items.iter().position(|item| item.id == product_id);
         match position {
             Some(pos) => {
@@ -56,7 +45,7 @@ impl Basket for CustomerBasket {
         }
     }
     
-    fn clear(&mut self) {
+    pub fn clear(&mut self) {
         self.items.clear();
     }
 }
