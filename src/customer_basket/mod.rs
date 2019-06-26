@@ -18,7 +18,16 @@ impl CustomerBasket {
         return CustomerBasket{ id: id, items: Vec::new()}
     }
 
-    pub fn add_item(&mut self, product_id: basket_item::ProductId, quantity: u8) {
+    pub fn change_item_quantity(&mut self, product_id: basket_item::ProductId, quantity: i8)  {
+        if quantity > 0 {
+            self.add_item(product_id, quantity as u8)
+        } else {
+            let abs: u8 = (quantity * -1) as u8;
+            self.remove_item(product_id, abs)
+        }
+    }
+
+    fn add_item(&mut self, product_id: basket_item::ProductId, quantity: u8) {
         let position = self.items.iter().position(|item| item.id == product_id);
         match position {
             Some(pos) => {
@@ -30,7 +39,7 @@ impl CustomerBasket {
         }
     }
 
-    pub fn remove_item(&mut self, product_id: basket_item::ProductId, quantity: u8) {
+    fn remove_item(&mut self, product_id: basket_item::ProductId, quantity: u8) {
         let position = self.items.iter().position(|item| item.id == product_id);
         match position {
             Some(pos) => {

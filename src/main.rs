@@ -3,10 +3,18 @@ mod customer_basket;
 use redis::Commands;
 use actix_web::{web, middleware, App, Error, error, HttpResponse, HttpServer};
 use customer_basket::{CustomerBasket};
-use customer_basket::basket_item::BasketItem;
-use futures::{future, Future, Stream};
+use customer_basket::basket_item::ProductId;
+use futures::{future, Future};
+use serde::{Serialize, Deserialize};
 
 static CLIENT_ID: &str = "4cba04f1-2436-4d79-b184-b1a8521ff0f9";
+
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ChangeBasketItemQuantityRequest {
+    pub id: ProductId,
+    pub quantity: i8
+}
 
 fn redis() -> redis::Connection {
     let client = redis::Client::open("redis://redis/").unwrap();
@@ -54,15 +62,18 @@ fn get_customer_basket() -> impl Future<Item = HttpResponse, Error = Error>  {
         }) 
 }
 
-fn add_item(item: web::Json<BasketItem>,) -> impl Future<Item = HttpResponse, Error = Error> {
+fn change_item_quantity(item: web::Json<ChangeBasketItemQuantityRequest>,) -> impl Future<Item = HttpResponse, Error = Error> {
     let con = redis();
     future::result::<Option<String>, redis::RedisError>(con.get(CLIENT_ID))        
-        .then(|customer_basket| {
+        .then(move |customer_basket| {
             match customer_basket {
                 Ok(basket) => {
+                    let con = con;
+                    let id = item.id.to_owned();
+                    let q = item.quantity;
                     let mut basket_resp = basket.map_or(CustomerBasket::empty(String::from(CLIENT_ID)), |v| serde_json::from_str(&v).unwrap());                   
-                    basket_resp.add_item(String::from("a971a2de-1d52-46d9-a9aa-e6df2e072d46"), 10);
-                    let _ : () = redis().set(CLIENT_ID, serde_json::to_string(&basket_resp)?).unwrap();
+                    basket_resp.change_item_quantity(id, q);
+                    let _ : () = con.set(CLIENT_ID, serde_json::to_string(&basket_resp)?).unwrap();
                     Ok(basket_resp)
                 }
                 Err(ex) => {
@@ -88,7 +99,7 @@ fn main() -> std::io::Result<()> {
         .service(web::resource("/").to_async(get_customer_basket))
         .service(
               web::resource("/hello/{name}").to_async(index))
-        .service(web::resource("/item").route(web::post().to_async(add_item))))
+        .service(web::resource("/item").route(web::post().to_async(change_item_quantity))))
         .bind("127.0.0.1:8080")?
         .start();
     println!("Starting http server: 127.0.0.1:8080");
