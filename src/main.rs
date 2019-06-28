@@ -87,6 +87,30 @@ fn change_item_quantity(item: web::Json<ChangeBasketItemQuantityRequest>,) -> im
         }) 
 }
 
+
+fn clear_basket() -> impl Future<Item = HttpResponse, Error = Error> {
+    let con = redis();
+    future::result::<Option<String>, redis::RedisError>(con.get(CLIENT_ID))        
+        .then(move |customer_basket| {
+            match customer_basket {
+                Ok(basket) => {
+                    let con = con;
+                    let mut basket_resp = basket.map_or(CustomerBasket::empty(String::from(CLIENT_ID)), |v| serde_json::from_str(&v).unwrap());                   
+                    basket_resp.clear();
+                    let _ : () = con.set(CLIENT_ID, serde_json::to_string(&basket_resp)?).unwrap();
+                    Ok(basket_resp)
+                }
+                Err(ex) => {
+                    println!("Error {}", ex);
+                    Err(error::ErrorBadRequest("redis error"))
+                }
+            } 
+        })
+        .and_then(|body| {
+            Ok(HttpResponse::Ok().json(body)) // <- send response
+        }) 
+}
+
 fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_LOG", "actix_web=info");
     env_logger::init();
@@ -99,7 +123,7 @@ fn main() -> std::io::Result<()> {
         .service(web::resource("/").to_async(get_customer_basket))
         .service(
               web::resource("/hello/{name}").to_async(index))
-        .service(web::resource("/item").route(web::post().to_async(change_item_quantity))))
+        .service(web::resource("/items").route(web::post().to_async(change_item_quantity)).route(web::delete().to_async(clear_basket))))
         .bind("127.0.0.1:8080")?
         .start();
     println!("Starting http server: 127.0.0.1:8080");
