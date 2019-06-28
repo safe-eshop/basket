@@ -18,9 +18,10 @@ impl CustomerBasket {
         return CustomerBasket{ id: id, items: Vec::new()}
     }
 
-    pub fn change_item_quantity(&mut self, product_id: basket_item::ProductId, quantity: i8)  {
+    pub fn change_item_quantity(&mut self, product_id: basket_item::ProductId, quantity: i8) -> Result<(), &str> {
         if quantity > 0 {
-            self.add_item(product_id, quantity as u8)
+            self.add_item(product_id, quantity as u8);
+            Ok(())
         } else {
             let abs: u8 = (quantity * -1) as u8;
             self.remove_item(product_id, abs)
@@ -39,17 +40,18 @@ impl CustomerBasket {
         }
     }
 
-    fn remove_item(&mut self, product_id: basket_item::ProductId, quantity: u8) {
+    fn remove_item(&mut self, product_id: basket_item::ProductId, quantity: u8) -> Result<(), &str> {
         let position = self.items.iter().position(|item| item.id == product_id);
         match position {
             Some(pos) => {
-                self.items[pos].decrease_quantity(quantity);      
-                if self.items[pos].is_empty() {
-                    self.items.remove(pos);
-                }
+               let res = self.items[pos].decrease_quantity(quantity);
+               if res.is_ok() && self.items[pos].is_empty() {
+                   self.items.remove(pos);
+               }
+               res
             },
             None => {
-                panic!("Item not exists");
+                Err("Item not exists")
             }
         }
     }

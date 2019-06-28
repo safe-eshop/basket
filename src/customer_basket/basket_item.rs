@@ -21,11 +21,12 @@ impl BasketItem {
         self.quantity += q;
     }
 
-    pub fn decrease_quantity(&mut self, q: u8) {
+    pub fn decrease_quantity(&mut self, q: u8) -> Result<(), &str>  {
         if self.quantity < q {
-            panic!("To small quantity");
+            Err("To small quantity")
         } else {
             self.quantity -= q;
+            Ok(())
         }
     }
 
@@ -39,9 +40,10 @@ mod tests {
     use super::*;
 
     #[test]
-    #[should_panic]
     fn test_decrease_item_quantity_when_is_to_small() {
-        BasketItem::empty(String::from("fdsajhgdsaj")).decrease_quantity(1);
+        let mut item = BasketItem::empty(String::from("fdsajhgdsaj"));
+        let res = item.decrease_quantity(1);
+        assert_eq!(res, Err("To small quantity"))
     }  
 
     #[test]
