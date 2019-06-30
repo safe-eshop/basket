@@ -49,7 +49,8 @@ mod tests {
     #[test]
     fn test_decrease_item_quantity() {
         let mut subject = BasketItem::new(String::from("fdsajhgdsaj"), 2);
-        subject.decrease_quantity(1);
+        let res = subject.decrease_quantity(1);
+        assert!(res.is_ok());
         assert_eq!(subject.quantity, 1)
     } 
 

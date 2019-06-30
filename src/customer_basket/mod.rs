@@ -44,11 +44,16 @@ impl CustomerBasket {
         let position = self.items.iter().position(|item| item.id == product_id);
         match position {
             Some(pos) => {
-               let res = self.items[pos].decrease_quantity(quantity);
-               if res.is_ok() && self.items[pos].is_empty() {
-                   self.items.remove(pos);
-               }
-               res
+                let element = &mut self.items[pos];
+                if element.quantity < quantity {
+                    return Err("To small quantity");
+                } else {
+                    element.quantity -= quantity;
+                    if element.is_empty() {
+                        self.items.remove(pos);                   
+                    }  
+                    return Ok(());
+                }     
             },
             None => {
                 Err("Item not exists")
@@ -95,19 +100,21 @@ mod tests {
     }  
 
     #[test]
-    #[should_panic]
     fn remove_item_when_no_exists() {
         let mut subject = CustomerBasket::empty(String::from("dskjhdsghdsfkjh"));
-        subject.remove_item(String::from("dsddsa"), 12);
+        let res = subject.remove_item(String::from("dsddsa"), 12);
+        assert!(res.is_err());
+        assert_eq!(res, Err("Item not exists"))
     }  
 
     #[test]
-    #[should_panic]
     fn remove_item_when_exists_and_item_quantity_is_smaller() {
         let mut subject = CustomerBasket::empty(String::from("dskjhdsghdsfkjh"));
         subject.add_item(String::from("dsddsa"), 12);
         subject.add_item(String::from("dsddsa22222222222222222222"), 12);
-        subject.remove_item(String::from("dsddsa"), 24);
+        let res = subject.remove_item(String::from("dsddsa"), 24);
+        assert!(res.is_err());
+        assert_eq!(res, Err("To small quantity"))
     } 
 
     #[test]

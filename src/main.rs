@@ -72,9 +72,16 @@ fn change_item_quantity(item: web::Json<ChangeBasketItemQuantityRequest>,) -> im
                     let id = item.id.to_owned();
                     let q = item.quantity;
                     let mut basket_resp = basket.map_or(CustomerBasket::empty(String::from(CLIENT_ID)), |v| serde_json::from_str(&v).unwrap());                   
-                    basket_resp.change_item_quantity(id, q);
-                    let _ : () = con.set(CLIENT_ID, serde_json::to_string(&basket_resp)?).unwrap();
-                    Ok(basket_resp)
+                    match basket_resp.change_item_quantity(id, q) {
+                        Ok(_) => {
+                            let _ : () = con.set(CLIENT_ID, serde_json::to_string(&basket_resp)?).unwrap();
+                            Ok(basket_resp)
+                        }
+                        Err(ex) => {
+                            println!("Error {}", ex);
+                            Err(error::ErrorBadRequest("to small quantity or item not exists"))
+                        }
+                    }
                 }
                 Err(ex) => {
                     println!("Error {}", ex);
