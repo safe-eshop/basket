@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using Basket.Common.Types;
 
 namespace Basket.Domain.Model
@@ -39,9 +40,23 @@ namespace Basket.Domain.Model
         }
 
 
-        public RopResult<CustomerBasket> AddItems(List<Item> items)
+        public RopResult<Unit> AddItems(List<Item> items)
         {
-            throw new NotImplementedException();
+            foreach (var item in items)
+            {
+                var oldItem = _items.FirstOrDefault(x => x.Id.Equals(item.Id));
+                if (oldItem is null)
+                {
+                    _items.Add(item);
+                }
+                else
+                {
+                    var newItem = oldItem.IncreaseQuantity(item.Quantity);
+                    int index = _items.IndexOf(oldItem);
+                    _items[index] = newItem;
+                }
+            }
+            return RopResult.UnitResult;
         }
     }
 }

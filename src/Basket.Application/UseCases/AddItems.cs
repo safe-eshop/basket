@@ -15,11 +15,11 @@ namespace Basket.Application.UseCases
 {
     public sealed class AddItems
     {
-        private ICustomerBasketRepository _customerBasketRepository;
+        private readonly ICustomerBasketRepository _customerBasketRepository;
 
         public AddItems(ICustomerBasketRepository customerBasketRepository)
         {
-            this.customerBasketRepository = customerBasketRepository;
+            _customerBasketRepository = customerBasketRepository;
         }
 
         public async Task<RopResult<Unit>> Execute(AddItemsRequest request)
@@ -28,16 +28,14 @@ namespace Basket.Application.UseCases
             var items = request.Items?.Select(item => Item.Create(item.productId, item.quantity)).ToList();
             if (items is null)
             {
-                 return RopResult<Unit>.Failure(new NoItemsToAddException(customerId));
+                return RopResult<Unit>.Failure(new NoItemsToAddException(customerId));
             }
-            
+
             var exists = await _customerBasketRepository.CustomerBasketExists(customerId);
             var basketResult = await GetBasket(exists, customerId);
-            var addItemsResult = await basketResult.BindAsync(basket =>
-            {
-                var newBasket = basket.AddItems(items);
-                return newBasket;
-            })
+            return await basketResult.Bind(basket => { return basket.AddItems(items).Map(_ => basket); })
+                .BindAsync(
+                    async basket => await _customerBasketRepository.InserOrUpdate(basket));
         }
 
         private async Task<RopResult<CustomerBasket>> GetBasket(RopResult<bool> exists, CustomerId customerId)
@@ -45,19 +43,10 @@ namespace Basket.Application.UseCases
             return await exists.BindAsync(async exist =>
             {
                 if (!exist) return RopResult<CustomerBasket>.Ok(CustomerBasket.Empty(customerId));
-                
+
                 var result = await _customerBasketRepository.GetCustomerBasket(customerId);
                 return result.Map(b => b.IfNone(() => CustomerBasket.Empty(customerId)));
             });
-        }
-
-        private RopResult<Unit> CheckRequest(CustomerId customerId, AddItemsRequest request)
-        {
-            if (!request?.Items?.Any() ?? false)
-            {
-                return RopResult<Unit>.Failure(new NoItemsToAddException(customerId));
-            }
-            
         }
     }
 }
