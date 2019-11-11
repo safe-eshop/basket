@@ -45,7 +45,7 @@ namespace Basket.Api
 
                 services.AddSwaggerGen(c =>
                 {
-                    c.SwaggerDoc("v1", new OpenApiInfo() {Title = "RossmannV5 Stocks Api", Version = "v1"});
+                    c.SwaggerDoc("v1", new OpenApiInfo() {Title = "Basket.Api", Version = "v1"});
                     var basePath = AppContext.BaseDirectory;
                     var assemblyName = Assembly.GetEntryAssembly().GetName().Name;
                     var fileName = Path.GetFileName(assemblyName + ".xml");
@@ -73,7 +73,7 @@ namespace Basket.Api
                     options.Level = CompressionLevel.Fastest;
                 });
                 services.AddHealthChecks()
-                    .AddRedis(Configuration["Service:ConnectionString"]);
+                    .AddRedis(Configuration.GetConnectionString("BasketData"));
             }
         }
 
@@ -102,7 +102,7 @@ namespace Basket.Api
             {
                 c.SwaggerEndpoint(
                     $"{(!string.IsNullOrEmpty(PathBase) ? PathBase : string.Empty)}/swagger/v1/swagger.json",
-                    "ShopsApi");
+                    "Basket.Api");
                 c.RoutePrefix = "swagger";
             });
 
