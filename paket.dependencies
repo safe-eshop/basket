@@ -4,8 +4,14 @@ storage: none
 
 
 nuget AspNetCore.HealthChecks.UI.Client
+nuget AspNetCore.HealthChecks.Redis
 nuget StackExchange.Redis
 nuget System.IdentityModel.Tokens.Jwt
+nuget LanguageExt.Core
+nuget MediatR
+nuget MediatR.Extensions.Microsoft.DependencyInjection
+nuget Swashbuckle.AspNetCore  >= 5.0.0-rc3
+nuget System.Collections.Immutable
 nuget Serilog
 nuget Serilog.AspNetCore
 nuget Serilog.Enrichers.Demystify
