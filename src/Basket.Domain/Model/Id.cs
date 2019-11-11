@@ -10,5 +10,10 @@ namespace Basket.Domain.Model
         {
             Value = value;
         }
+
+        public static BasketId Create()
+        {
+            return new BasketId(Guid.NewGuid());
+        }
     }
 }

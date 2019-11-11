@@ -22,5 +22,10 @@ namespace Basket.Domain.Model
         {
             return new CustomerBasket(id, customerId);
         }
+        
+        public static CustomerBasket Empty(CustomerId customerId)
+        {
+            return new CustomerBasket(BasketId.Create(), customerId);
+        }
     }
 }
