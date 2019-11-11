@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Basket.Application.ApplicationsErrors;
@@ -24,12 +25,18 @@ namespace Basket.Application.UseCases
         public async Task<RopResult<Unit>> Execute(AddItemsRequest request)
         {
             var customerId = new CustomerId(request.CustomerId);
-            var items = request.Items?.Select(item => new Item()).ToList();
+            var items = request.Items?.Select(item => Item.Create(item.productId, item.quantity)).ToList();
+            if (items is null)
+            {
+                 return RopResult<Unit>.Failure(new NoItemsToAddException(customerId));
+            }
+            
             var exists = await _customerBasketRepository.CustomerBasketExists(customerId);
             var basketResult = await GetBasket(exists, customerId);
             var addItemsResult = await basketResult.BindAsync(basket =>
             {
-                var newBasket = basket.AddItems(request.Items);
+                var newBasket = basket.AddItems(items);
+                return newBasket;
             })
         }
 

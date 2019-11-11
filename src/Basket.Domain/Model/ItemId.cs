@@ -2,9 +2,9 @@ namespace Basket.Domain.Model
 {
     public sealed class ItemId
     {
-        public int Value { get; }
+        public string Value { get; }
 
-        public ItemId(int value)
+        public ItemId(string value)
         {
             Value = value;
         }
