@@ -13,10 +13,6 @@ namespace Basket.Application.ApplicationsErrors
             CustomerId = customerId;
         }
 
-        protected BasketException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
-
         public BasketException(string message, CustomerId customerId) : base(message)
         {
             CustomerId = customerId;

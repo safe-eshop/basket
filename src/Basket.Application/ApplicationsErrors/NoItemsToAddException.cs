@@ -10,10 +10,6 @@ namespace Basket.Application.ApplicationsErrors
         {
         }
 
-        protected NoItemsToAddException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
-
         public NoItemsToAddException(string message, CustomerId customerId) : base(message, customerId)
         {
         }
