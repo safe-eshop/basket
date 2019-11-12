@@ -94,8 +94,7 @@ namespace Basket.Api
             {
                 app.UseErrorLogging();
             }
-
-
+            
             app.UseRouting();
             app.UseSwagger();
             app.UseSwaggerUI(c =>

@@ -28,7 +28,7 @@ namespace Basket.Application.UseCases
             var items = request.Items?.Select(item => Item.Create(item.productId, item.quantity)).ToList();
             if (items is null)
             {
-                return RopResult<Unit>.Failure(new NoItemsToAddException(customerId));
+                return RopResult<Unit>.Failure(new NoItemsToAddApplicationException(customerId));
             }
 
             var exists = await _customerBasketRepository.CustomerBasketExists(customerId);
