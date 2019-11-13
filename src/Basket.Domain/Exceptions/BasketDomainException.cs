@@ -5,7 +5,7 @@ namespace Basket.Domain.Exceptions
 {
     public abstract class BasketDomainException : Exception
     {
-        protected CustomerId CustomerId { get; }
+        public CustomerId CustomerId { get; }
 
         protected BasketDomainException(CustomerId customerId)
         {

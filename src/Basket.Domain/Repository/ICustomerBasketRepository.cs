@@ -9,7 +9,7 @@ namespace Basket.Domain.Repository
     public interface ICustomerBasketRepository
     {
         Task<RopResult<bool>> CustomerBasketExists(CustomerId id);
-        Task<RopResult<Option<CustomerBasket>>> GetCustomerBasket(CustomerId id);
+        Task<RopResult<CustomerBasket>> GetCustomerBasket(CustomerId id);
         Task<RopResult<Unit>> InserOrUpdate(CustomerBasket basket);
         Task<RopResult<Unit>> Remove(CustomerId id);
     }

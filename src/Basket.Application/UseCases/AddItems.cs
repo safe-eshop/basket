@@ -24,15 +24,14 @@ namespace Basket.Application.UseCases
 
         public async Task<RopResult<Unit>> Execute(AddItemsRequest request)
         {
-            var customerId = new CustomerId(request.CustomerId);
             var items = request.Items?.Select(item => Item.Create(item.productId, item.quantity)).ToList();
             if (items is null)
             {
-                return RopResult<Unit>.Failure(new NoItemsToAddApplicationException(customerId));
+                return RopResult<Unit>.Failure(new NoItemsToAddApplicationException(request.CustomerId));
             }
 
-            var exists = await _customerBasketRepository.CustomerBasketExists(customerId);
-            var basketResult = await GetBasket(exists, customerId);
+            var exists = await _customerBasketRepository.CustomerBasketExists(request.CustomerId);
+            var basketResult = await GetBasket(exists, request.CustomerId);
             return await basketResult.Bind(basket => { return basket.AddItems(items).Map(_ => basket); })
                 .BindAsync(
                     async basket => await _customerBasketRepository.InserOrUpdate(basket));
@@ -44,8 +43,7 @@ namespace Basket.Application.UseCases
             {
                 if (!exist) return RopResult<CustomerBasket>.Ok(CustomerBasket.Empty(customerId));
 
-                var result = await _customerBasketRepository.GetCustomerBasket(customerId);
-                return result.Map(b => b.IfNone(() => CustomerBasket.Empty(customerId)));
+                return await _customerBasketRepository.GetCustomerBasket(customerId);
             });
         }
     }

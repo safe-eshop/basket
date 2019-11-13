@@ -33,7 +33,12 @@ namespace Basket.Domain.Model
         
         public static Item Create(string productId, int quantity)
         {
-            return new Item(new ItemId(productId), new ItemQuantity(quantity));
+            return Create(new ItemId(productId), new ItemQuantity(quantity));
+        }
+        
+        public static Item Create(ItemId productId, ItemQuantity quantity)
+        {
+            return new Item(productId, quantity);
         }
 
         public Item IncreaseQuantity(ItemQuantity itemQuantity)
