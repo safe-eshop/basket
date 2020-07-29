@@ -1,5 +1,5 @@
 source https://api.nuget.org/v3/index.json
-framework: netcoreapp3.0, netstandard2.1, netstandard2.0
+framework: netcoreapp3.1, netstandard2.1, netstandard2.0
 storage: none
 
 
@@ -10,7 +10,7 @@ nuget System.IdentityModel.Tokens.Jwt
 nuget LanguageExt.Core
 nuget MediatR
 nuget MediatR.Extensions.Microsoft.DependencyInjection
-nuget Swashbuckle.AspNetCore  >= 5.0.0-rc3
+nuget Swashbuckle.AspNetCore
 nuget System.Collections.Immutable
 nuget Serilog
 nuget Serilog.AspNetCore
