@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Basket.Api.Framework.Logging;
+using Carter;
 using HealthChecks.UI.Client;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -44,7 +45,7 @@ namespace Basket.Api
         public void ConfigureServices(IServiceCollection services)
         {
             {
-                services.AddControllers().AddJsonOptions(x => { x.JsonSerializerOptions.IgnoreNullValues = true; });
+                services.AddCarter();
 
                 services.AddAuthentication(options =>
                 {
@@ -58,21 +59,14 @@ namespace Basket.Api
                         ValidateAudience = true,
                         ValidateIssuer = true,
                         ValidIssuer = Configuration["Jwt:Issuer"],
-                        ValidAudience = Configuration["Jwt:Issuer"],
+                        ValidAudience = Configuration["Jwt:Audience"],
                         IssuerSigningKey =
-                            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]))
+                            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Secret"]))
                     };
                 });
-                
-                services.AddSwaggerGen(c =>
-                {
-                    c.SwaggerDoc("v1", new OpenApiInfo() {Title = "Basket.Api", Version = "v1"});
-                    var basePath = AppContext.BaseDirectory;
-                    var assemblyName = Assembly.GetEntryAssembly()?.GetName().Name;
-                    var fileName = Path.GetFileName(assemblyName + ".xml");
-                    c.IncludeXmlComments(Path.Combine(basePath, fileName), includeControllerXmlComments: true);
-                });
 
+                services.AddAuthorization();
+                services.AddCors();
                 services.AddResponseCompression(options =>
                 {
                     options.Providers.Add<GzipCompressionProvider>();
@@ -107,14 +101,6 @@ namespace Basket.Api
             });
 
             app.UseRouting();
-            app.UseSwagger();
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint(
-                    $"{(!string.IsNullOrEmpty(PathBase) ? PathBase : string.Empty)}/swagger/v1/swagger.json",
-                    "Basket.Api");
-                c.RoutePrefix = "swagger";
-            });
 
             app.UseCors(builder =>
             {
@@ -127,7 +113,7 @@ namespace Basket.Api
             
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers();
+                endpoints.MapCarter();
                 endpoints.MapHealthChecks("/health", new HealthCheckOptions()
                 {
                     Predicate = _ => true,
