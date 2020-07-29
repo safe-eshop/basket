@@ -21,3 +21,4 @@ Serilog.Sinks.Console
 Serilog.Sinks.Trace
 Serilog.Sinks.Seq
 Serilog.Formatting.Elasticsearch
+Microsoft.AspNetCore.Authentication.JwtBearer

@@ -4,10 +4,12 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 using Basket.Api.Framework.Logging;
 using HealthChecks.UI.Client;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -20,6 +22,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
 
@@ -43,24 +46,31 @@ namespace Basket.Api
             {
                 services.AddControllers().AddJsonOptions(x => { x.JsonSerializerOptions.IgnoreNullValues = true; });
 
+                services.AddAuthentication(options =>
+                {
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                }).AddJwtBearer(config =>
+                {
+                    config.IncludeErrorDetails = true;
+                    config.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateAudience = true,
+                        ValidateIssuer = true,
+                        ValidIssuer = Configuration["Jwt:Issuer"],
+                        ValidAudience = Configuration["Jwt:Issuer"],
+                        IssuerSigningKey =
+                            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]))
+                    };
+                });
+                
                 services.AddSwaggerGen(c =>
                 {
                     c.SwaggerDoc("v1", new OpenApiInfo() {Title = "Basket.Api", Version = "v1"});
                     var basePath = AppContext.BaseDirectory;
-                    var assemblyName = Assembly.GetEntryAssembly().GetName().Name;
+                    var assemblyName = Assembly.GetEntryAssembly()?.GetName().Name;
                     var fileName = Path.GetFileName(assemblyName + ".xml");
                     c.IncludeXmlComments(Path.Combine(basePath, fileName), includeControllerXmlComments: true);
-                });
-
-
-                services.AddCors(config =>
-                {
-                    var policy = new CorsPolicy();
-                    policy.Headers.Add("*");
-                    policy.Methods.Add("*");
-                    policy.Origins.Add("*");
-                    policy.SupportsCredentials = true;
-                    config.AddPolicy("policy", policy);
                 });
 
                 services.AddResponseCompression(options =>
@@ -72,8 +82,7 @@ namespace Basket.Api
                 {
                     options.Level = CompressionLevel.Fastest;
                 });
-                services.AddHealthChecks()
-                    .AddRedis(Configuration.GetConnectionString("BasketData"));
+                services.AddHealthChecks().AddMongoDb(Configuration.GetConnectionString("MongoDb"));
             }
         }
 
@@ -90,11 +99,13 @@ namespace Basket.Api
             {
                 app.UseDeveloperExceptionPage();
             }
-            else
-            {
-                app.UseErrorLogging();
-            }
             
+            app.UseSerilogRequestLogging(opts =>
+            {
+                opts.EnrichDiagnosticContext = RequestLogging.EnrichFromRequest;
+                opts.GetLevel = RequestLogging.ExcludeHealthChecks; // Use the custom level
+            });
+
             app.UseRouting();
             app.UseSwagger();
             app.UseSwaggerUI(c =>
@@ -105,8 +116,15 @@ namespace Basket.Api
                 c.RoutePrefix = "swagger";
             });
 
-            app.UseCors("policy");
-
+            app.UseCors(builder =>
+            {
+                builder.AllowAnyHeader();
+                builder.AllowAnyMethod();
+                builder.AllowAnyOrigin();
+            });
+            app.UseAuthentication();
+            app.UseAuthorization();
+            
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
