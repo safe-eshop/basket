@@ -29,6 +29,7 @@ nuget Serilog.Sinks.Trace
 nuget Serilog.Sinks.Seq
 nuget Serilog.Formatting.Elasticsearch
 nuget Microsoft.AspNetCore.Authentication.JwtBearer
+nuget Carter 
 
 nuget Microsoft.NET.Test.Sdk
 nuget xunit
