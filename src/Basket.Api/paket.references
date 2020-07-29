@@ -1,5 +1,5 @@
 AspNetCore.HealthChecks.UI.Client
-AspNetCore.HealthChecks.Redis
+AspNetCore.HealthChecks.MongoDb
 LanguageExt.Core
 MediatR
 MediatR.Extensions.Microsoft.DependencyInjection

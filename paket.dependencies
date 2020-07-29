@@ -4,8 +4,9 @@ storage: none
 
 
 nuget AspNetCore.HealthChecks.UI.Client
-nuget AspNetCore.HealthChecks.Redis
-nuget StackExchange.Redis
+nuget AspNetCore.HealthChecks.MongoDb
+nuget MongoDB.Driver
+nuget MongoDB.Bson
 nuget System.IdentityModel.Tokens.Jwt
 nuget LanguageExt.Core
 nuget MediatR
