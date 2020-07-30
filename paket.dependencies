@@ -30,6 +30,8 @@ nuget Serilog.Sinks.Seq
 nuget Serilog.Formatting.Elasticsearch
 nuget Microsoft.AspNetCore.Authentication.JwtBearer
 nuget Carter 
+nuget LanguageExt.FSharp
+nuget FSharp.Core
 
 nuget Microsoft.NET.Test.Sdk
 nuget xunit

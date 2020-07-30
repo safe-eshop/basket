@@ -22,7 +22,7 @@ namespace Basket.Application.UseCases
             _customerBasketRepository = customerBasketRepository;
         }
 
-        public async Task<RopResult<Unit>> Execute(AddItemsRequest request)
+        public async Task<Either<Base>> Execute(AddItemsRequest request)
         {
             var items = request.Items?.Select(item => Item.Create(item.productId, item.quantity)).ToList();
             if (items is null)
