@@ -1,20 +1,19 @@
 using System;
 using System.Runtime.Serialization;
-using Basket.Domain.Model;
 
 namespace Basket.Application.ApplicationsErrors
 {
     public class NoItemsToAddApplicationException : BasketApplicationException
     {
-        public NoItemsToAddApplicationException(CustomerId customerId) : base(customerId)
+        public NoItemsToAddApplicationException()
         {
         }
 
-        public NoItemsToAddApplicationException(string message, CustomerId customerId) : base(message, customerId)
+        public NoItemsToAddApplicationException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
 
-        public NoItemsToAddApplicationException(string message, Exception innerException, CustomerId customerId) : base(message, innerException, customerId)
+        public NoItemsToAddApplicationException(Guid id) : base(id)
         {
         }
     }

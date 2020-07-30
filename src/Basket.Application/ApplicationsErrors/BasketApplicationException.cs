@@ -1,22 +1,20 @@
 using System;
 using System.Runtime.Serialization;
-using Basket.Domain;
-using Basket.Domain.Exceptions;
-using Basket.Domain.Model;
+using Basket.Domain.Types;
 
 namespace Basket.Application.ApplicationsErrors
 {
-    public abstract class BasketApplicationException : BasketDomainException
+    public abstract class BasketApplicationException : BasketException
     {
-        protected BasketApplicationException(CustomerId customerId) : base(customerId)
+        protected BasketApplicationException()
         {
         }
 
-        protected BasketApplicationException(string message, CustomerId customerId) : base(message, customerId)
+        protected BasketApplicationException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
 
-        protected BasketApplicationException(string message, Exception innerException, CustomerId customerId) : base(message, innerException, customerId)
+        protected BasketApplicationException(Guid id) : base(id)
         {
         }
     }

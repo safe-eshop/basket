@@ -8,6 +8,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Basket.Common\Basket.Common.csproj" />
     <ProjectReference Include="..\Basket.Domain\Basket.Domain.csproj" />
+    <ProjectReference Include="..\Basket.Domain\Basket.Domain.fsproj" />
     <ProjectReference Include="..\Basket.Infrastructure\Basket.Infrastructure.csproj" />
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />

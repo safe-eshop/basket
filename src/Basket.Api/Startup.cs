@@ -25,6 +25,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using MongoDB.Driver;
 using Serilog;
 
 namespace Basket.Api
@@ -64,7 +65,6 @@ namespace Basket.Api
                             new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Secret"]))
                     };
                 });
-
                 services.AddAuthorization();
                 services.AddCors();
                 services.AddResponseCompression(options =>

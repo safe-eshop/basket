@@ -1,14 +1,14 @@
-using Basket.Domain.Model;
+using System;
 
 namespace Basket.Application.Dto
 {
     public class GetCustomerBasketRequest
     {
-        public GetCustomerBasketRequest(CustomerId customerId)
+        public GetCustomerBasketRequest(Guid customerId)
         {
             CustomerId = customerId;
         }
 
-        public CustomerId CustomerId { get; }
+        public Guid CustomerId { get; }
     }
 }

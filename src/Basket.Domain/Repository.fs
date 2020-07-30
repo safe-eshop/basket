@@ -3,4 +3,5 @@ open System.Threading.Tasks
 open Basket.Domain.Types
 
 type ICustomerBasketRepository =
-    abstract member CustomerBasketExists: CustomerId -> Task<CustomerBasket option>
+    abstract member Get: CustomerId -> Task<CustomerBasket option>
+    abstract member Exists: CustomerId -> Task<bool>
