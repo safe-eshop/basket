@@ -8,6 +8,8 @@ type CustomerId = Guid
 
 type Item = { Id: ItemId; Quantity: Quantity } with
     static member Create productId quantity =  { Id = productId; Quantity = quantity }
+    member this.IncreaseQuantity(quantity: Quantity) =  { this with Quantity = this.Quantity + quantity }
+    member this.DecreaseQuantity(quantity: Quantity) =  { this with Quantity = this.Quantity - quantity }
     
 type Items = Item seq
 
