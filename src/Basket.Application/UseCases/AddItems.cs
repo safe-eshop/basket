@@ -12,25 +12,19 @@ using FSharp = LanguageExt.FSharp;
 
 namespace Basket.Application.UseCases
 {
-    public sealed class AddItems
+    public sealed class AddItem
     {
         private readonly ICustomerBasketRepository _customerBasketRepository;
 
-        public AddItems(ICustomerBasketRepository customerBasketRepository)
+        public AddItem(ICustomerBasketRepository customerBasketRepository)
         {
             _customerBasketRepository = customerBasketRepository;
         }
 
-        public async Task<Either<Exception, Unit>> Execute(AddItemsRequest request)
+        public async Task<Either<Exception, Unit>> Execute(AddItemRequest request)
         {
-            var items = request.Items?.Select(item => Item.Create(item.productId, item.quantity)).ToList();
-            if (items is null)
-            {
-                return Left<Exception, Unit>(new NoItemsToAddApplicationException(request.CustomerId));
-            }
-            
             var basketResult = await GetBasket(request.CustomerId);
-            return await basketResult.Bind(basket => { return basket.AddItems(items).Map(_ => basket); })
+            return await basketResult.Bind(basket => { return basket.AddItem(item).Map(_ => basket); })
                 .BindAsync(
                     async basket => await _customerBasketRepository.InserOrUpdate(basket));
         }

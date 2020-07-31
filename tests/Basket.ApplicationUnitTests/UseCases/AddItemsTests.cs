@@ -18,7 +18,7 @@ namespace Basket.ApplicationUnitTests.UseCases
             var custmerId = CustomerId.Crate(id);
             var repo = new FakeCustomerBasketRepository(custmerId, false, false);
             var useCase = new AddItems(repo);
-            var subject = await useCase.Execute(new AddItemsRequest(custmerId,
+            var subject = await useCase.Execute(new AddItemRequest(custmerId,
                 new List<(ItemId productId, ItemQuantity quantity)>() {(new ItemId("1"), new ItemQuantity(1))}));
 
             subject.IsSucceed.Should().BeTrue();

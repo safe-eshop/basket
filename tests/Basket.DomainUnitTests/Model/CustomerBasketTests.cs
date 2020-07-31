@@ -14,9 +14,26 @@ namespace Basket.DomainUnitTests.Model
             var id = Guid.NewGuid();
             var productId = Guid.NewGuid();
             var basket = CustomerBasket.Empty(id);
-            var subject = basket.AddItems(new List<Item>() {Item.Create(productId, 10)});
+            var subject = basket.AddItem(Item.Create(productId, 10));
             subject.CustomerId.Should().Be(id);
-            basket.Items.Should().Contain(Item.Create(productId, 10));
+            subject.Items.Should().Contain(Item.Create(productId, 10));
+        }
+        
+        [Fact]
+        public void AddItemsWhenBasketIsNotEmpty()
+        {
+            var id = Guid.NewGuid();
+            var productId = Guid.NewGuid();
+            var basket = CustomerBasket.Empty(id);
+            var subject = basket.AddItem(Item.Create(productId, 10));
+            subject.CustomerId.Should().Be(id);
+            subject.Items.Should().Contain(Item.Create(productId, 10));
+            var productId2 = Guid.NewGuid();
+            subject = subject.AddItem(Item.Create(productId, 10));
+            subject = subject.AddItem(Item.Create(productId2, 10));
+            subject.CustomerId.Should().Be(id);
+            subject.Items.Should().Contain(Item.Create(productId, 20));
+            subject.Items.Should().Contain(Item.Create(productId2, 10));
         }
         
         //

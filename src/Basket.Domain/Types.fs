@@ -20,8 +20,14 @@ type Items = Item seq
 
 type CustomerBasket = { CustomerId: CustomerId; Items: Items } with
     static member Empty(customerId: CustomerId) = { CustomerId = customerId; Items = Seq.empty }
-    member this.AddItems(items: Items) =
-        this
+    member this.AddItem(item: Item) =
+      let exists = this.Items |> Seq.exists(fun x -> x.Id = item.Id)
+      if exists then
+          let newItems = this.Items |> Seq.map(fun x -> if x.Id = item.Id then x.IncreaseQuantity(item.Quantity) else x)
+          { this with Items = newItems }
+      else
+        let element = Seq.singleton item
+        { this with Items = Seq.append this.Items element }
         
 
 exception BasketException of id: CustomerId

@@ -1,17 +1,18 @@
 using System;
 using System.Collections.Generic;
+using Basket.Domain.Types;
 
 namespace Basket.Application.Dto
 {
-    public class AddItemsRequest
+    public class AddItemRequest
     {
-        public AddItemsRequest(Guid customerId, IEnumerable<(Guid productId, int quantity)> items)
+        public AddItemRequest(Guid customerId, Item item)
         {
             CustomerId = customerId;
-            Items = items;
+            Item = item;
         }
 
         public Guid CustomerId { get; }
-        public IEnumerable<(Guid productId, int quantity)> Items { get; }      
+        public Item Item { get; }
     }
 }
