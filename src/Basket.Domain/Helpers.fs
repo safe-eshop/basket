@@ -1,3 +1,4 @@
-﻿module Basket.Domain.Helpers
+﻿namespace Basket.Domain
 
-let MapAndInsertIfNotExists l = 2
+module Result = 
+    let UnitOk () = Ok(())

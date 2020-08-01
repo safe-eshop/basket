@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Basket.Domain;
 using Basket.Domain.Repository;
 using Basket.Domain.Types;
 using Basket.Infrastructure.Model;
@@ -9,12 +11,14 @@ using Microsoft.FSharp.Core;
 using MongoDB.Driver;
 using Unit = Microsoft.FSharp.Core.Unit;
 using static LanguageExt.Prelude;
+using FSharpx;
+using LanguageExt.UnsafeValueAccess;
 
 namespace Basket.Infrastructure.Repository
 {
-    public class MongoCustomerBasketRepository : ICustomerBasketRepository
+    public class MongoCustomerBasketRepository : ICustomerBasketRepository, IDisposable
     {
-        private const string CustomerBasketCollection = nameof(CustomerBasket);
+        public const string CustomerBasketCollection = nameof(CustomerBasket);
         private readonly IMongoClient _client;
         private readonly IMongoDatabase _database;
         private readonly IMongoCollection<MongoCustomerBasket> _mongoCustomerBasket;
@@ -42,9 +46,27 @@ namespace Basket.Infrastructure.Repository
             }
         }
 
-        public async Task<FSharpResult<Unit, Exception>> InsertOrUpdate(CustomerBasket missing_name)
+        public async Task<FSharpResult<Unit, Exception>> InsertOrUpdate(CustomerBasket customerBasket)
         {
-            throw new NotImplementedException();
+            var items = customerBasket.Items
+                .Select(x => new MongoCustomerBasketItem() {ItemId = x.Id, Quantity = x.Quantity}).ToList();
+            var mongo = new MongoCustomerBasket()
+            {
+                Id = customerBasket.Id,
+                CustomerId = customerBasket.CustomerId,
+                Items = items
+            };
+            var filter = Builders<MongoCustomerBasket>.Filter.Eq(x => x.Id, customerBasket.Id);
+            var options = new ReplaceOptions {IsUpsert = true};
+            return await _session.MatchAsync(async session =>
+            {
+                await _mongoCustomerBasket.ReplaceOneAsync(session, filter, mongo, options);
+                return Domain.Result.UnitOk<Exception>();
+            }, async () =>
+            {
+                await _mongoCustomerBasket.ReplaceOneAsync(filter, mongo, options);
+                return Domain.Result.UnitOk<Exception>();
+            });
         }
 
         public async Task<bool> Exists(Guid basketId)
@@ -68,6 +90,15 @@ namespace Basket.Infrastructure.Repository
         {
             await _session.MatchAsync(async session => await session.AbortTransactionAsync(),
                 () => throw new Exception("No session started"));
+        }
+
+
+        public void Dispose()
+        {
+            _session.IfSome(session =>
+            {
+                session.Dispose();
+            });
         }
     }
 }

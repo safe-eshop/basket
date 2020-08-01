@@ -32,7 +32,7 @@ nuget Microsoft.AspNetCore.Authentication.JwtBearer
 nuget Carter 
 nuget LanguageExt.FSharp
 nuget FSharp.Core
-
+nuget FSharpx.Extras
 nuget Microsoft.NET.Test.Sdk
 nuget xunit
 nuget xunit.runner.visualstudio
