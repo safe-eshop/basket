@@ -30,8 +30,9 @@ namespace Basket.Infrastructure.Repository
 
         public async Task<FSharpOption<CustomerBasket>> Get(Guid customerBasketId)
         {
-            var query = _session.Match(session => _mongoCustomerBasket.Find(session, Filter(customerBasketId)),
-                () => _mongoCustomerBasket.Find(Filter(customerBasketId)));
+            var query = _session
+                .Match(session => _mongoCustomerBasket.Find(session, Filter(customerBasketId)),
+                    () => _mongoCustomerBasket.Find(Filter(customerBasketId)));
             var collection = await query.FirstOrDefaultAsync();
             return Optional(collection).Map(MongoCustomerBasket.MapToCustomerBasket).ToFSharp();
 

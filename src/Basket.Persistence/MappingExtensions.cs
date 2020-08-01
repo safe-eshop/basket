@@ -4,9 +4,9 @@ using MongoDB.Bson.Serialization;
 
 namespace Basket.Persistence
 {
-    public class MappingExtensions
+    public static class MappingExtensions
     {
-        public void AddCollections()
+        public static void AddCollections()
         {
             BsonClassMap.RegisterClassMap<MongoCustomerBasketItem>();
             BsonClassMap.RegisterClassMap<MongoCustomerBasket>();
