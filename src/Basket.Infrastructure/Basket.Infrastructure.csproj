@@ -6,7 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Basket.Domain\Basket.Domain.csproj" />
+    <ProjectReference Include="..\Basket.Application\Basket.Application.csproj" />
+    <ProjectReference Include="..\Basket.Domain\Basket.Domain.fsproj" />
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

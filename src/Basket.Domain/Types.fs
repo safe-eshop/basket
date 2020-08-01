@@ -17,9 +17,10 @@ type Item = { Id: ItemId; Quantity: Quantity } with
             this
     
 type Items = Item seq
+type BasketId = Guid
 
-type CustomerBasket = { CustomerId: CustomerId; Items: Items } with
-    static member Empty(customerId: CustomerId) = { CustomerId = customerId; Items = Seq.empty }
+type CustomerBasket = { Id: BasketId; CustomerId: CustomerId; Items: Items } with
+    static member Empty(customerId: CustomerId) = { Id = Guid.NewGuid(); CustomerId = customerId; Items = Seq.empty }
     member this.AddItem(item: Item) =
       let exists = this.Items |> Seq.exists(fun x -> x.Id = item.Id)
       if exists then
