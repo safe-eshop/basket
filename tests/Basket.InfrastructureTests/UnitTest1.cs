@@ -1,4 +1,3 @@
-using System;
 using Xunit;
 
 namespace Basket.InfrastructureTests
@@ -8,6 +7,7 @@ namespace Basket.InfrastructureTests
         [Fact]
         public void Test1()
         {
+            
         }
     }
 }
