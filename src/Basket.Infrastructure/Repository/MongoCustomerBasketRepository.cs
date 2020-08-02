@@ -35,15 +35,10 @@ namespace Basket.Infrastructure.Repository
         public async Task<FSharpOption<CustomerBasket>> Get(Guid customerBasketId)
         {
             var query = _session
-                .Match(session => _mongoCustomerBasket.Find(session, Filter(customerBasketId)),
-                    () => _mongoCustomerBasket.Find(Filter(customerBasketId)));
+                .Match(session => _mongoCustomerBasket.Find(session, GetByCustomerIdFilter(customerBasketId)),
+                    () => _mongoCustomerBasket.Find(GetByCustomerIdFilter(customerBasketId)));
             var collection = await query.FirstOrDefaultAsync();
             return Optional(collection).Map(MongoCustomerBasket.MapToCustomerBasket).ToFSharp();
-
-            Expression<Func<MongoCustomerBasket, bool>> Filter(Guid id)
-            {
-                return x => x.CustomerId == id;
-            }
         }
 
         public async Task<FSharpResult<Unit, Exception>> InsertOrUpdate(CustomerBasket customerBasket)
@@ -74,6 +69,19 @@ namespace Basket.Infrastructure.Repository
             throw new NotImplementedException();
         }
 
+        public async Task<FSharpResult<Unit, Exception>> Remove(Guid customerId)
+        {
+            return await _session.MatchAsync(async session =>
+            {
+                await _mongoCustomerBasket.FindOneAndDeleteAsync(session, GetByCustomerIdFilter(customerId));
+                return Domain.Result.UnitOk<Exception>();
+            }, async () =>
+            {
+                await _mongoCustomerBasket.FindOneAndDeleteAsync(GetByCustomerIdFilter(customerId));
+                return Domain.Result.UnitOk<Exception>();
+            });
+        }
+
         public async ValueTask StartTransaction()
         {
             var ses = await _client.StartSessionAsync();
@@ -95,10 +103,13 @@ namespace Basket.Infrastructure.Repository
 
         public void Dispose()
         {
-            _session.IfSome(session =>
-            {
-                session.Dispose();
-            });
+            _session.IfSome(session => { session.Dispose(); });
+        }
+
+
+        private Expression<Func<MongoCustomerBasket, bool>> GetByCustomerIdFilter(Guid id)
+        {
+            return x => x.CustomerId == id;
         }
     }
 }
