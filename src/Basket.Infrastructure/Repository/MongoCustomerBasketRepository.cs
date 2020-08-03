@@ -45,10 +45,10 @@ namespace Basket.Infrastructure.Repository
             var basketOpt = Optional(basket).Map(MongoCustomerBasket.MapToCustomerBasket)
                 .IfNone(() => CustomerBasket.Empty(customerId));
             var newBasket = basketOpt.AddItem(item);
-            var filter = Builders<MongoCustomerBasket>.Filter.Eq(x => x.Id, newBasket.Id);
-            var options = new ReplaceOptions {IsUpsert = true};
-            await _mongoCustomerBasket.ReplaceOneAsync(session, filter,
-                MongoCustomerBasket.MapToMongoCustomerBasket(newBasket), options);
+            await _mongoCustomerBasket.ReplaceOneAsync(session, x => x.Id == newBasket.Id,
+                MongoCustomerBasket.MapToMongoCustomerBasket(newBasket), new ReplaceOptions {IsUpsert = true});
+
+            await session.CommitTransactionAsync();
             return FSharpResult<CustomerBasket, Exception>.NewOk(newBasket);
         }
 
@@ -67,8 +67,11 @@ namespace Basket.Infrastructure.Repository
             if (basketOpt.IsSome)
             {
                 await _mongoCustomerBasket.DeleteOneAsync(session, x => x.CustomerId == customerId);
+                await session.CommitTransactionAsync();
                 return FSharpResult<CustomerBasket, Exception>.NewOk(basketOpt.ValueUnsafe());
             }
+
+            await session.AbortTransactionAsync();
             return FSharpResult<CustomerBasket, Exception>.NewError(new Exception("No basket to checkout"));
         }
 
