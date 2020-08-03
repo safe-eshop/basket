@@ -2,12 +2,11 @@
 open System
 open System.Threading.Tasks
 open Basket.Domain.Types
-
+    
 type ICustomerBasketRepository =
-    abstract member Get: customerId: CustomerId -> Task<CustomerBasket option>
-    abstract member InsertOrUpdate: customerBasket: CustomerBasket -> Task<Result<unit, Exception>>
-    abstract member Exists: customerId: CustomerId -> Task<bool>
-    abstract member Remove: customerId: CustomerId -> Task<Result<unit, Exception>>
-    abstract member StartTransaction: unit -> ValueTask
-    abstract member CompleteTransaction: unit -> ValueTask
-    abstract member AbortTransaction: unit -> ValueTask
+    abstract member GetByCustomerId: customerId: CustomerId -> Task<CustomerBasket option>
+    abstract member AddItem: customerId: CustomerId * item: Item  -> Task<Result<CustomerBasket, Exception>>
+    abstract member RemoveItem: customerId: CustomerId * item: Item -> Task<Result<CustomerBasket, Exception>>
+    abstract member Checkout: customerId: CustomerId -> Task<Result<CustomerBasket, Exception>>
+    
+    

@@ -43,8 +43,8 @@ namespace Basket.InfrastructureTests
         [Fact]
         public async Task GetNotExistingCustomerBasket()
         {
-            using var repo = new MongoCustomerBasketRepository(_mongoDbFixture.Client, _mongoDbFixture.Database);
-            var result = await repo.Get(Guid.NewGuid());
+            var repo = new MongoCustomerBasketRepository(_mongoDbFixture.Client, _mongoDbFixture.Database);
+            var result = await repo.GetByCustomerId(Guid.NewGuid());
             fs(result).IsNone.Should().BeTrue();
         }
 
@@ -53,16 +53,18 @@ namespace Basket.InfrastructureTests
         {
             var id = Guid.NewGuid();
             var item = Item.Create(Guid.NewGuid(), 10);
-            using var repo = new MongoCustomerBasketRepository(_mongoDbFixture.Client, _mongoDbFixture.Database);
+            var repo = new MongoCustomerBasketRepository(_mongoDbFixture.Client, _mongoDbFixture.Database);
             
-            var res = await repo.InsertOrUpdate(CustomerBasket.Empty(id).AddItem(item));
+            var res = await repo.AddItem(id, item);
             res.IsOk.Should().BeTrue();
             
-            var result = await repo.Get(id);
-            var subject = fs(result);
-            subject.IsSome.Should().BeTrue();
-            subject.ValueUnsafe().CustomerId.Should().Be(id);
-            subject.ValueUnsafe().Items.Should().Contain(item);
+            var result = await repo.GetByCustomerId(id);
+            var opt = fs(result);
+            opt.IsSome.Should().BeTrue();
+            var subject = opt.ValueUnsafe();
+            subject.CustomerId.Should().Be(id);
+            subject.Items.Should().Contain(item);
+            
         }
         
         [Fact]
@@ -70,15 +72,15 @@ namespace Basket.InfrastructureTests
         {
             var id = Guid.NewGuid();
             var item = Item.Create(Guid.NewGuid(), 10);
-            using var repo = new MongoCustomerBasketRepository(_mongoDbFixture.Client, _mongoDbFixture.Database);
+            var repo = new MongoCustomerBasketRepository(_mongoDbFixture.Client, _mongoDbFixture.Database);
             
             // Insert New
-            var res = await repo.InsertOrUpdate(CustomerBasket.Empty(id).AddItem(item));
+            var res = await repo.AddItem(id, item);
             res.IsOk.Should().BeTrue();
             
             
             // Get new and check if basket and item exists
-            var result = await repo.Get(id);
+            var result = await repo.GetByCustomerId(id);
             var subject = fs(result);
             
             
@@ -88,10 +90,10 @@ namespace Basket.InfrastructureTests
             
             
             // Try update basket=
-            res = await repo.InsertOrUpdate(subject.ValueUnsafe().AddItem(item));
+            res = await repo.AddItem(id, item);
             res.IsOk.Should().BeTrue();
             
-            result = await repo.Get(id);
+            result = await repo.GetByCustomerId(id);
             subject = fs(result);
             subject.IsSome.Should().BeTrue();
             subject.ValueUnsafe().CustomerId.Should().Be(id);
@@ -105,15 +107,15 @@ namespace Basket.InfrastructureTests
         {
             var id = Guid.NewGuid();
             var item = Item.Create(Guid.NewGuid(), 10);
-            using var repo = new MongoCustomerBasketRepository(_mongoDbFixture.Client, _mongoDbFixture.Database);
+            var repo = new MongoCustomerBasketRepository(_mongoDbFixture.Client, _mongoDbFixture.Database);
             
             // Insert New
-            var res = await repo.InsertOrUpdate(CustomerBasket.Empty(id).AddItem(item));
+            var res = await repo.AddItem(id, item);
             res.IsOk.Should().BeTrue();
             
             
             // Get new and check if basket and item exists
-            var result = await repo.Get(id);
+            var result = await repo.GetByCustomerId(id);
             var subject = fs(result);
             
             
@@ -123,10 +125,10 @@ namespace Basket.InfrastructureTests
             
             
             // Try update basket=
-            res = await repo.Remove(id);
+            res = await repo.Checkout(id);
             res.IsOk.Should().BeTrue();
             
-            result = await repo.Get(id);
+            result = await repo.GetByCustomerId(id);
             subject = fs(result);
             subject.IsNone.Should().BeTrue();
         }

@@ -19,7 +19,7 @@ namespace Basket.Application.UseCases
         
         public async Task<Option<CustomerBasketDto>> Execute(GetCustomerBasketRequest request)
         {
-            var result = await _customerBasketRepository.Get(request.CustomerId);
+            var result = await _customerBasketRepository.GetByCustomerId(request.CustomerId);
             return fs(result).Map(b => b.ToDto());
         }
     }

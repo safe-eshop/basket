@@ -13,99 +13,64 @@ using Unit = Microsoft.FSharp.Core.Unit;
 using static LanguageExt.Prelude;
 using FSharpx;
 using LanguageExt.UnsafeValueAccess;
+using static LanguageExt.Prelude;
 
 namespace Basket.Infrastructure.Repository
 {
-    public class MongoCustomerBasketRepository : ICustomerBasketRepository, IDisposable
+    public class MongoCustomerBasketRepository : ICustomerBasketRepository
     {
         public const string CustomerBasketCollection = nameof(CustomerBasket);
         private readonly IMongoClient _client;
         private readonly IMongoDatabase _database;
         private readonly IMongoCollection<MongoCustomerBasket> _mongoCustomerBasket;
-        private Option<IClientSessionHandle> _session;
 
         public MongoCustomerBasketRepository(IMongoClient client, IMongoDatabase database)
         {
             _client = client;
             _database = database;
             _mongoCustomerBasket = _database.GetCollection<MongoCustomerBasket>(CustomerBasketCollection);
-            _session = None;
         }
 
-        public async Task<FSharpOption<CustomerBasket>> Get(Guid customerBasketId)
+        public async Task<FSharpOption<CustomerBasket>> GetByCustomerId(Guid customerId)
         {
-            var query = _session
-                .Match(session => _mongoCustomerBasket.Find(session, GetByCustomerIdFilter(customerBasketId)),
-                    () => _mongoCustomerBasket.Find(GetByCustomerIdFilter(customerBasketId)));
-            var collection = await query.FirstOrDefaultAsync();
-            return Optional(collection).Map(MongoCustomerBasket.MapToCustomerBasket).ToFSharp();
+            var result = await _mongoCustomerBasket.Find(GetByCustomerIdFilter(customerId)).FirstOrDefaultAsync();
+            return Optional(result).Map(MongoCustomerBasket.MapToCustomerBasket).ToFSharp();
         }
 
-        public async Task<FSharpResult<Unit, Exception>> InsertOrUpdate(CustomerBasket customerBasket)
+        public async Task<FSharpResult<CustomerBasket, Exception>> AddItem(Guid customerId, Item item)
         {
-            var items = customerBasket.Items
-                .Select(x => new MongoCustomerBasketItem() {ItemId = x.Id, Quantity = x.Quantity}).ToList();
-            var mongo = new MongoCustomerBasket()
-            {
-                Id = customerBasket.Id,
-                CustomerId = customerBasket.CustomerId,
-                Items = items
-            };
-            var filter = Builders<MongoCustomerBasket>.Filter.Eq(x => x.Id, customerBasket.Id);
+            using var session = await _client.StartSessionAsync();
+            var basket = await _mongoCustomerBasket.Find(session, GetByCustomerIdFilter(customerId))
+                .FirstOrDefaultAsync();
+            var basketOpt = Optional(basket).Map(MongoCustomerBasket.MapToCustomerBasket)
+                .IfNone(() => CustomerBasket.Empty(customerId));
+            var newBasket = basketOpt.AddItem(item);
+            var filter = Builders<MongoCustomerBasket>.Filter.Eq(x => x.Id, newBasket.Id);
             var options = new ReplaceOptions {IsUpsert = true};
-            return await _session.MatchAsync(async session =>
-            {
-                await _mongoCustomerBasket.ReplaceOneAsync(session, filter, mongo, options);
-                return Domain.Result.UnitOk<Exception>();
-            }, async () =>
-            {
-                await _mongoCustomerBasket.ReplaceOneAsync(filter, mongo, options);
-                return Domain.Result.UnitOk<Exception>();
-            });
+            await _mongoCustomerBasket.ReplaceOneAsync(session, filter,
+                MongoCustomerBasket.MapToMongoCustomerBasket(newBasket), options);
+            return FSharpResult<CustomerBasket, Exception>.NewOk(newBasket);
         }
 
-        public async Task<bool> Exists(Guid basketId)
+        public async Task<FSharpResult<CustomerBasket, Exception>> RemoveItem(Guid customerId, Item item)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<FSharpResult<Unit, Exception>> Remove(Guid customerId)
+        public async Task<FSharpResult<CustomerBasket, Exception>> Checkout(Guid customerId)
         {
-            return await _session.MatchAsync(async session =>
+            using var session = await _client.StartSessionAsync();
+            var basket = await _mongoCustomerBasket.Find(session, GetByCustomerIdFilter(customerId))
+                .FirstOrDefaultAsync();
+            var basketOpt = Optional(basket).Map(MongoCustomerBasket.MapToCustomerBasket);
+
+            if (basketOpt.IsSome)
             {
-                await _mongoCustomerBasket.FindOneAndDeleteAsync(session, GetByCustomerIdFilter(customerId));
-                return Domain.Result.UnitOk<Exception>();
-            }, async () =>
-            {
-                await _mongoCustomerBasket.FindOneAndDeleteAsync(GetByCustomerIdFilter(customerId));
-                return Domain.Result.UnitOk<Exception>();
-            });
+                await _mongoCustomerBasket.DeleteOneAsync(session, x => x.CustomerId == customerId);
+                return FSharpResult<CustomerBasket, Exception>.NewOk(basketOpt.ValueUnsafe());
+            }
+            return FSharpResult<CustomerBasket, Exception>.NewError(new Exception("No basket to checkout"));
         }
-
-        public async ValueTask StartTransaction()
-        {
-            var ses = await _client.StartSessionAsync();
-            _session = Some(ses);
-        }
-
-        public async ValueTask CompleteTransaction()
-        {
-            await _session.MatchAsync(async session => await session.CommitTransactionAsync(),
-                () => throw new Exception("No session started"));
-        }
-
-        public async ValueTask AbortTransaction()
-        {
-            await _session.MatchAsync(async session => await session.AbortTransactionAsync(),
-                () => throw new Exception("No session started"));
-        }
-
-
-        public void Dispose()
-        {
-            _session.IfSome(session => { session.Dispose(); });
-        }
-
 
         private Expression<Func<MongoCustomerBasket, bool>> GetByCustomerIdFilter(Guid id)
         {

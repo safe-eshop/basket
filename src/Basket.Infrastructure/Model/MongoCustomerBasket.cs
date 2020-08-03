@@ -32,5 +32,17 @@ namespace Basket.Infrastructure.Model
             var items = basket.Items.Select(x => Item.Create(x.ItemId, x.Quantity)).ToList();
             return new CustomerBasket(basket.Id, basket.CustomerId, items);
         } 
+        
+        public static MongoCustomerBasket MapToMongoCustomerBasket(CustomerBasket basket)
+        {
+            var items = basket.Items
+                .Select(x => new MongoCustomerBasketItem() {ItemId = x.Id, Quantity = x.Quantity}).ToList();
+            return new MongoCustomerBasket()
+            {
+                Id = basket.Id,
+                CustomerId = basket.CustomerId,
+                Items = items
+            };
+        } 
     }
 }
