@@ -29,6 +29,7 @@ type CustomerBasket = { Id: BasketId; CustomerId: CustomerId; Items: Items } wit
       else
         let element = Seq.singleton item
         { this with Items = Seq.append this.Items element }
+    member this.RemoveItem(item: Item) = this
         
 
 exception BasketException of id: CustomerId
