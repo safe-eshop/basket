@@ -24,7 +24,7 @@ Serilog.Formatting.Elasticsearch
 Microsoft.AspNetCore.Authentication.JwtBearer
 Carter
 App.Metrics
-App.Metrics.Datadog
+App.Metrics.Reporting.Console
 App.Metrics.Extensions.HealthChecks
 App.Metrics.Reporting.HTTP
 App.Metrics.AspNetCore.All

@@ -1,18 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Basket.Api.Framework.Logging;
-using Carter;
 using HealthChecks.UI.Client;
-using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -22,10 +15,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using MongoDB.Driver;
 using Serilog;
 
 namespace Basket.Api
@@ -45,7 +35,8 @@ namespace Basket.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddControllers().AddMetrics();
+            services.AddAppMetricsHealthPublishing();
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -74,7 +65,7 @@ namespace Basket.Api
             {
                 options.Level = CompressionLevel.Fastest;
             });
-            services.AddHealthChecks().AddMongoDb(Configuration.GetConnectionString("MongoDb"));
+            services.AddHealthChecks();
         }
 
 

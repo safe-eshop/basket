@@ -6,7 +6,7 @@ storage: none
 nuget AspNetCore.HealthChecks.UI.Client
 nuget AspNetCore.HealthChecks.MongoDb
 nuget App.Metrics
-nuget App.Metrics.Datadog
+nuget App.Metrics.Reporting.Console
 nuget App.Metrics.Extensions.HealthChecks
 nuget App.Metrics.Reporting.HTTP
 nuget App.Metrics.AspNetCore.All
