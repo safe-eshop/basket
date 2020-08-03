@@ -45,40 +45,38 @@ namespace Basket.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddControllers();
+            services.AddAuthentication(options =>
             {
-                services.AddCarter();
-
-                services.AddAuthentication(options =>
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(config =>
+            {
+                config.IncludeErrorDetails = true;
+                config.TokenValidationParameters = new TokenValidationParameters
                 {
-                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                }).AddJwtBearer(config =>
-                {
-                    config.IncludeErrorDetails = true;
-                    config.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateAudience = true,
-                        ValidateIssuer = true,
-                        ValidIssuer = Configuration["Jwt:Issuer"],
-                        ValidAudience = Configuration["Jwt:Audience"],
-                        IssuerSigningKey =
-                            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Secret"]))
-                    };
-                });
-                services.AddAuthorization();
-                services.AddCors();
-                services.AddResponseCompression(options =>
-                {
-                    options.Providers.Add<GzipCompressionProvider>();
-                    options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] {"application/json"});
-                });
-                services.Configure<GzipCompressionProviderOptions>(options =>
-                {
-                    options.Level = CompressionLevel.Fastest;
-                });
-                services.AddHealthChecks().AddMongoDb(Configuration.GetConnectionString("MongoDb"));
-            }
+                    ValidateAudience = true,
+                    ValidateIssuer = true,
+                    ValidIssuer = Configuration["Jwt:Issuer"],
+                    ValidAudience = Configuration["Jwt:Audience"],
+                    IssuerSigningKey =
+                        new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Secret"]))
+                };
+            });
+            services.AddAuthorization();
+            services.AddCors();
+            services.AddResponseCompression(options =>
+            {
+                options.Providers.Add<GzipCompressionProvider>();
+                options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] {"application/json"});
+            });
+            services.Configure<GzipCompressionProviderOptions>(options =>
+            {
+                options.Level = CompressionLevel.Fastest;
+            });
+            services.AddHealthChecks().AddMongoDb(Configuration.GetConnectionString("MongoDb"));
         }
+
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -93,15 +91,13 @@ namespace Basket.Api
             {
                 app.UseDeveloperExceptionPage();
             }
-            
+
             app.UseSerilogRequestLogging(opts =>
             {
                 opts.EnrichDiagnosticContext = RequestLogging.EnrichFromRequest;
                 opts.GetLevel = RequestLogging.ExcludeHealthChecks; // Use the custom level
             });
-
             app.UseRouting();
-
             app.UseCors(builder =>
             {
                 builder.AllowAnyHeader();
@@ -110,15 +106,15 @@ namespace Basket.Api
             });
             app.UseAuthentication();
             app.UseAuthorization();
-            
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapCarter();
+                endpoints.MapControllers();
                 endpoints.MapHealthChecks("/health", new HealthCheckOptions()
                 {
                     Predicate = _ => true,
                     ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
                 });
+
                 endpoints.MapHealthChecks("/ping", new HealthCheckOptions()
                 {
                     Predicate = r => r.Name.Contains("self"),

@@ -9,9 +9,9 @@
     <content url="file://$USER_HOME$/.nuget/packages/mongodb.driver.core/2.11.0/runtimes/win/native/snappy32.dll" />
     <content url="file://$USER_HOME$/.nuget/packages/mongodb.driver.core/2.11.0/runtimes/win/native/snappy64.dll" />
     <content url="file://$USER_HOME$/.nuget/packages/mongodb.libmongocrypt/1.0.0/x64/native/windows/mongocrypt.dll" />
-    <content url="file://$USER_HOME$/.nuget/packages/xunit.runner.visualstudio/2.4.2/build/netcoreapp2.1/xunit.runner.reporters.netcoreapp10.dll" />
-    <content url="file://$USER_HOME$/.nuget/packages/xunit.runner.visualstudio/2.4.2/build/netcoreapp2.1/xunit.runner.utility.netcoreapp10.dll" />
-    <content url="file://$USER_HOME$/.nuget/packages/xunit.runner.visualstudio/2.4.2/build/netcoreapp2.1/xunit.runner.visualstudio.dotnetcore.testadapter.dll" />
+    <content url="file://$USER_HOME$/.nuget/packages/xunit.runner.visualstudio/2.4.3/build/netcoreapp2.1/xunit.runner.reporters.netcoreapp10.dll" />
+    <content url="file://$USER_HOME$/.nuget/packages/xunit.runner.visualstudio/2.4.3/build/netcoreapp2.1/xunit.runner.utility.netcoreapp10.dll" />
+    <content url="file://$USER_HOME$/.nuget/packages/xunit.runner.visualstudio/2.4.3/build/netcoreapp2.1/xunit.runner.visualstudio.dotnetcore.testadapter.dll" />
     <content url="file://$MODULE_DIR$/../.." />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
