@@ -103,7 +103,7 @@ namespace Basket.InfrastructureTests
         
         
         [Fact]
-        public async Task GetExistingCustomerBasketAndRemoveIt()
+        public async Task GetExistingCustomerBasketAndCheckout()
         {
             var id = Guid.NewGuid();
             var item = Item.Create(Guid.NewGuid(), 10);
@@ -131,6 +131,39 @@ namespace Basket.InfrastructureTests
             result = await repo.GetByCustomerId(id);
             subject = fs(result);
             subject.IsNone.Should().BeTrue();
+        }
+        
+        [Fact]
+        public async Task GetExistingCustomerBasketAndRemoveExistsingItem()
+        {
+            var id = Guid.NewGuid();
+            var itemId = Guid.NewGuid();
+            var item = Item.Create(itemId, 10);
+            var repo = new MongoCustomerBasketRepository(_mongoDbFixture.Client, _mongoDbFixture.Database);
+            
+            // Insert New
+            var res = await repo.AddItem(id, item);
+            res.IsOk.Should().BeTrue();
+            
+            
+            // Get new and check if basket and item exists
+            var result = await repo.GetByCustomerId(id);
+            var subject = fs(result);
+            
+            
+            subject.IsSome.Should().BeTrue();
+            subject.ValueUnsafe().CustomerId.Should().Be(id);
+            subject.ValueUnsafe().Items.Should().Contain(item);
+            
+            
+            // Try update basket=
+            res = await repo.RemoveItem(id, Item.Create(itemId, 5));
+            res.IsOk.Should().BeTrue();
+            
+            result = await repo.GetByCustomerId(id);
+            subject = fs(result);
+            subject.IsSome.Should().BeTrue();
+            subject.ValueUnsafe().Items.Should().Contain(Item.Create(itemId, 5));
         }
     }
 }

@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using Basket.Common.Types;
 using Basket.Domain.Model;
 using Basket.Domain.Repository;
+using Basket.Domain.Types;
 using Basket.Infrastructure.InfrastructureExceptions;
 using LanguageExt;
 using Unit = Basket.Common.Types.Unit;

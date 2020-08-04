@@ -40,6 +40,7 @@ namespace Basket.Infrastructure.Repository
         public async Task<FSharpResult<CustomerBasket, Exception>> AddItem(Guid customerId, Item item)
         {
             using var session = await _client.StartSessionAsync();
+            session.StartTransaction();
             var basket = await _mongoCustomerBasket.Find(session, GetByCustomerIdFilter(customerId))
                 .FirstOrDefaultAsync();
             var basketOpt = Optional(basket).Map(MongoCustomerBasket.MapToCustomerBasket)
@@ -54,7 +55,31 @@ namespace Basket.Infrastructure.Repository
 
         public async Task<FSharpResult<CustomerBasket, Exception>> RemoveItem(Guid customerId, Item item)
         {
-            throw new NotImplementedException();
+            using var session = await _client.StartSessionAsync();
+            var basket = await _mongoCustomerBasket.Find(session, GetByCustomerIdFilter(customerId))
+                .FirstOrDefaultAsync();
+            var basketOpt = Optional(basket)
+                .Map(MongoCustomerBasket.MapToCustomerBasket).Map(x => x.RemoveItem(item))
+                .Where(x => !x.IsEmpty());
+
+            if (basketOpt.IsSome)
+            {
+                session.StartTransaction();
+                var newBasket = basketOpt.ValueUnsafe();
+                if (newBasket.IsEmpty())
+                {
+                    await _mongoCustomerBasket.DeleteOneAsync(session, x => x.CustomerId == customerId);
+                    await session.CommitTransactionAsync();
+                    return FSharpResult<CustomerBasket, Exception>.NewOk(basketOpt.ValueUnsafe());
+                }
+
+                await _mongoCustomerBasket.ReplaceOneAsync(session, x => x.CustomerId == customerId,
+                    MongoCustomerBasket.MapToMongoCustomerBasket(newBasket));
+                await session.CommitTransactionAsync();
+                return FSharpResult<CustomerBasket, Exception>.NewOk(basketOpt.ValueUnsafe());
+            }
+
+            return FSharpResult<CustomerBasket, Exception>.NewOk(basketOpt.ValueUnsafe());
         }
 
         public async Task<FSharpResult<CustomerBasket, Exception>> Checkout(Guid customerId)
@@ -66,12 +91,12 @@ namespace Basket.Infrastructure.Repository
 
             if (basketOpt.IsSome)
             {
+                session.StartTransaction();
                 await _mongoCustomerBasket.DeleteOneAsync(session, x => x.CustomerId == customerId);
                 await session.CommitTransactionAsync();
                 return FSharpResult<CustomerBasket, Exception>.NewOk(basketOpt.ValueUnsafe());
             }
 
-            await session.AbortTransactionAsync();
             return FSharpResult<CustomerBasket, Exception>.NewError(new Exception("No basket to checkout"));
         }
 

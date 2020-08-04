@@ -15,6 +15,7 @@ type Item = { Id: ItemId; Quantity: Quantity } with
             { this with Quantity = this.Quantity - quantity }
         else
             this
+    member this.IsEmpty() = this.Quantity = 0
     
 type Items = Item seq
 type BasketId = Guid
@@ -29,7 +30,17 @@ type CustomerBasket = { Id: BasketId; CustomerId: CustomerId; Items: Items } wit
       else
         let element = Seq.singleton item
         { this with Items = Seq.append this.Items element }
-    member this.RemoveItem(item: Item) = this
+    member this.RemoveItem(item: Item) =
+        let exists = this.Items |> Seq.exists(fun x -> x.Id = item.Id)
+        if exists then
+            let items = this.Items
+                        |> Seq.map(fun x -> if x.Id = item.Id then x.DecreaseQuantity(item.Quantity) else x)
+                        |> Seq.filter(fun x -> x.IsEmpty() |> not)
+            { this with Items = items }
+        else
+            this
+    member this.IsEmpty() =
+        this.Items |> Seq.isEmpty
         
 
 exception BasketException of id: CustomerId
