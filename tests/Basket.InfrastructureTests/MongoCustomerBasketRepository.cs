@@ -18,10 +18,10 @@ namespace Basket.InfrastructureTests
 
         public MongoDbFixture()
         {
-            MappingExtensions.AddCollections();
-
-            Client = new MongoClient("mongodb://root:rootpassword@127.0.0.1:27017");
+            Client = new MongoClient(Environment.GetEnvironmentVariable("TST_MONGO_BASKET") ?? "mongodb://root:rootpassword@127.0.0.1:27017");
+            
             Database = Client.GetDatabase($"{nameof(Basket)}{nameof(InfrastructureTests)}");
+            Database.AddCollections();
         }
 
 
