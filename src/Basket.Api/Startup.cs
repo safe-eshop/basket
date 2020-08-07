@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Basket.Api.Framework.Logging;
+using Basket.Api.Orleans;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -110,6 +111,16 @@ namespace Basket.Api
                 {
                     Predicate = r => r.Name.Contains("self"),
                     ResponseWriter = PongWriteResponse,
+                });
+                
+                endpoints.MapGet("/", async context =>
+                {
+                    IGrainFactory client = context.RequestServices.GetService<IGrainFactory>()!;
+                    IHelloArchive grain = client.GetGrain<IHelloArchive>(0)!;
+                    await grain.SayHello("Hello world");
+                    await context.Response.WriteAsync("Keep refreshing your browser \n");
+                    var res2 = await grain.GetGreetings();
+                    await context.Response.WriteAsync(string.Join("\n", res2));
                 });
             });
         }

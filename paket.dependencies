@@ -34,8 +34,9 @@ nuget Serilog.Sinks.Trace
 nuget Serilog.Sinks.Seq
 nuget Serilog.Formatting.Elasticsearch
 nuget Microsoft.AspNetCore.Authentication.JwtBearer
-nuget Carter 
-nuget LanguageExt.FSharp
+nuget Microsoft.Orleans.Core 
+nuget Microsoft.Orleans.Runtime.Abstractions
+nuget LanguageEaxt.FSharp
 nuget FSharp.Core
 nuget FSharpx.Extras
 nuget Microsoft.NET.Test.Sdk

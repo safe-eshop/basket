@@ -32,6 +32,19 @@ namespace Basket.Api
                     });
                 })
                 .UseMetrics()
+                .UseOrleans(builder =>
+                {
+                    builder
+                        .UseLocalhostClustering()
+                        .Configure<ClusterOptions>(options =>
+                        {
+                            options.ClusterId = "dev";
+                            options.ServiceId = "HelloWorldApp";
+                        })
+                        .Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Loopback)
+                        .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(HelloArchiveGrain).Assembly).WithReferences())
+                        .AddMemoryGrainStorage(name: "ArchiveStorage");
+                })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();

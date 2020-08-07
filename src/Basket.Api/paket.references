@@ -22,7 +22,8 @@ Serilog.Sinks.Trace
 Serilog.Sinks.Seq
 Serilog.Formatting.Elasticsearch
 Microsoft.AspNetCore.Authentication.JwtBearer
-Carter
+Microsoft.Orleans.Core 
+Microsoft.Orleans.Runtime.Abstractions
 App.Metrics
 App.Metrics.Reporting.Console
 App.Metrics.Extensions.HealthChecks
