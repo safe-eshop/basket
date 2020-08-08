@@ -24,6 +24,8 @@ Serilog.Formatting.Elasticsearch
 Microsoft.AspNetCore.Authentication.JwtBearer
 Microsoft.Orleans.Core 
 Microsoft.Orleans.Runtime.Abstractions
+Microsoft.Orleans.Server
+Microsoft.Orleans.CodeGenerator.MsBuild
 App.Metrics
 App.Metrics.Reporting.Console
 App.Metrics.Extensions.HealthChecks
