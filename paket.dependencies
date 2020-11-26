@@ -1,5 +1,5 @@
 source https://api.nuget.org/v3/index.json
-framework: netcoreapp3.1, netstandard2.1, netstandard2.0
+framework: net5.0
 storage: none
 
 
@@ -18,18 +18,14 @@ nuget MediatR
 nuget MediatR.Extensions.Microsoft.DependencyInjection
 nuget Swashbuckle.AspNetCore
 nuget System.Collections.Immutable
-nuget Serilog
 nuget Serilog.AspNetCore
-nuget Serilog.Enrichers.Demystify
 nuget Serilog.Enrichers.Environment
 nuget Serilog.Enrichers.Process
 nuget Serilog.Enrichers.Thread
 nuget Serilog.Exceptions
-nuget Serilog.Extensions.Hosting
 nuget Serilog.Extensions.Logging
 nuget Serilog.Formatting.Compact
 nuget Serilog.Sinks.Async
-nuget Serilog.Sinks.Console
 nuget Serilog.Sinks.Trace
 nuget Serilog.Sinks.Seq
 nuget Serilog.Formatting.Elasticsearch

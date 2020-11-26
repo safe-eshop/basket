@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Basket.Infrastructure\Basket.Infrastructure.csproj" />
-    <ProjectReference Include="..\..\src\Basket.Persistence\Basket.Persistence.csproj" />
+    <ProjectReference Include="..\..\src\Basket.Infrastructure.Persistence\Basket.Infrastructure.Persistence.csproj" />
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>
