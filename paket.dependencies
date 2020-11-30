@@ -37,6 +37,7 @@ nuget Microsoft.Orleans.CodeGenerator.MsBuild
 nuget LanguageExt.FSharp
 nuget FSharp.Core
 nuget FSharpx.Extras
+nuget FsUnit.xUnit
 nuget Microsoft.NET.Test.Sdk
 nuget xunit
 nuget xunit.runner.visualstudio
