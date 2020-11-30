@@ -1,17 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="RIDER_MODULE" version="4">
   <component name="NewModuleRootManager">
-    <content url="file://$USER_HOME$/.nuget/packages/microsoft.net.test.sdk/16.8.0/build/netcoreapp2.1" />
-    <content url="file://$USER_HOME$/.nuget/packages/microsoft.testplatform.testhost/16.8.0/build/netcoreapp2.1/x64/testhost.dll" />
-    <content url="file://$USER_HOME$/.nuget/packages/microsoft.testplatform.testhost/16.8.0/build/netcoreapp2.1/x64/testhost.exe" />
-    <content url="file://$USER_HOME$/.nuget/packages/mongodb.driver.core/2.11.4/contentFiles/any/netstandard2.0/Core" />
-    <content url="file://$USER_HOME$/.nuget/packages/mongodb.driver.core/2.11.4/runtimes/win/native/libzstd.dll" />
-    <content url="file://$USER_HOME$/.nuget/packages/mongodb.driver.core/2.11.4/runtimes/win/native/snappy32.dll" />
-    <content url="file://$USER_HOME$/.nuget/packages/mongodb.driver.core/2.11.4/runtimes/win/native/snappy64.dll" />
-    <content url="file://$USER_HOME$/.nuget/packages/mongodb.libmongocrypt/1.0.0/x64/native/windows/mongocrypt.dll" />
-    <content url="file://$USER_HOME$/.nuget/packages/xunit.runner.visualstudio/2.4.3/build/netcoreapp2.1/xunit.runner.reporters.netcoreapp10.dll" />
-    <content url="file://$USER_HOME$/.nuget/packages/xunit.runner.visualstudio/2.4.3/build/netcoreapp2.1/xunit.runner.utility.netcoreapp10.dll" />
-    <content url="file://$USER_HOME$/.nuget/packages/xunit.runner.visualstudio/2.4.3/build/netcoreapp2.1/xunit.runner.visualstudio.dotnetcore.testadapter.dll" />
     <content url="file://$MODULE_DIR$/../.." />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
